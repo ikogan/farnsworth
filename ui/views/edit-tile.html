@@ -1,0 +1,43 @@
+<md-card>
+    <md-card-title ng-if='controller.tile.id'>Edit Tile</md-card-title>
+    <md-card-title ng-if='!controller.tile.id'>New Tile</md-card-title>
+    <md-card-content class='md-inline-form' layout='column'>
+        <form name='tileForm'>
+            <md-input-container class='md-block'>
+                <label>Name</label>
+                <input ng-model='controller.tile.name' type='text' />
+            </md-input-container>
+            <md-input-container class='md-inline-form md-block'>
+                <md-icon md-ink-ripple aria-label="Add Category" class='clickable'
+                    ng-click='controller.addCategory();'>add_circle</md-icon>
+                <md-select placeholder="Category" ng-model="controller.tile.category">
+                    <md-option ng-value='category' ng-repeat='category in controller.categories'>
+                        {{ category }}
+                    </md-option>
+                </md-select>
+            </md-input-container>
+            <div layout='row' layout-align='space-between center'>
+                <div md-color-picker ng-model="controller.tile.backgroundColor"
+                    label="Background Color" icon="format_color_fill"
+                    md-color-open-on-input="true"></div>
+                <div md-color-picker ng-model="controller.tile.textColor"
+                    label="Background Color" icon="format_color_text"
+                    md-color-open-on-input="true"></div>
+            </div>
+            <md-input-container class='md-block'>
+                <label>Command</label>
+                <md-icon>code</md-icon>
+                <input ng-model='controller.tile.command' type='text' />
+            </md-input-container>
+            <md-input-container class='md-block'>
+                <label>Image Path</label>
+                <md-icon>image</md-icon>
+                <input ng-model='controller.tile.image' type='text' />
+            </md-input-container>
+        </form>
+    </md-card-content>
+    <md-card-actions>
+        <md-button ng-click='controller.save(controller.tile);'>Save</md-button>
+        <md-button ng-click='controller.cancel();'>Cancel</md-button>
+    </md-card-actions>
+</md-card>

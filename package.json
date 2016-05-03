@@ -1,14 +1,14 @@
 {
-  "name": "electron-quick-start",
+  "name": "farnsworth-laundher",
   "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "description": "Fullscreen Application Launcher for TVs",
   "main": "main.js",
   "scripts": {
     "start": "electron main.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/electron/electron-quick-start.git"
+    "url": "git@bitbucket.org:ikogan/farnsworth.git"
   },
   "keywords": [
     "Electron",
@@ -16,13 +16,27 @@
     "start",
     "tutorial"
   ],
-  "author": "GitHub",
-  "license": "CC0-1.0",
+  "author": "Ilya Kogan <ikogan@mythicnet.org>",
+  "license": "CPAL-4.0",
   "bugs": {
-    "url": "https://github.com/electron/electron-quick-start/issues"
+    "url": "https://bitbucket.org/ikogan/farnsworth"
   },
-  "homepage": "https://github.com/electron/electron-quick-start#readme",
+  "homepage": "https://bitbucket.org/ikogan/farnsworth#readme",
   "devDependencies": {
+    "angular-mocks": "^1.5.5",
     "electron-prebuilt": "^0.37.0"
+  },
+  "dependencies": {
+    "angular": "^1.5.5",
+    "angular-animate": "^1.5.5",
+    "angular-aria": "^1.5.5",
+    "angular-material": "^1.0.8",
+    "angular-messages": "^1.5.5",
+    "angular-route": "^1.5.5",
+    "angular-sanitize": "^1.5.5",
+    "lodash": "^4.11.1",
+    "material-design-icons": "^2.2.3",
+    "md-color-picker": "^0.2.6",
+    "roboto-fontface": "^0.4.5"
   }
 }
