@@ -1,30 +1,21 @@
-# electron-quick-start
+# Farnsworth Launcher
 
-**Clone and run for a quick way to see an Electron in action.**
+A simple [Electron](http://electron.atom.io/) based,
+configurable launcher for systems connected to a TV. Farnsworth
+is optimized for use with a remote control or game controller. There is no
+"media" functionality, that is, no video or music library or support for
+live TV. Farnsworth's purpose is to simply launch other applications and
+get out of the way.
 
-This is a minimal Electron application based on the [Quick Start Guide](http://electron.atom.io/docs/latest/tutorial/quick-start) within the Electron documentation.
-
-A basic Electron application needs just these files:
-
-- `index.html` - A web page to render.
-- `main.js` - Starts the app and creates a browser window to render HTML.
-- `package.json` - Points to the app's main file and lists its details and dependencies.
-
-You can learn more about each of these components within the [Quick Start Guide](http://electron.atom.io/docs/latest/tutorial/quick-start).
-
-## To Use
-
-To clone and run this repository you'll need [Git](https://git-scm.com) and [Node.js](https://nodejs.org/en/download/) (which comes with [npm](http://npmjs.com)) installed on your computer. From your command line:
+## Development
 
 ```bash
 # Clone this repository
-git clone https://github.com/electron/electron-quick-start
+git clone git clone git@bitbucket.org:ikogan/farnsworth.git
 # Go into the repository
-cd electron-quick-start
+cd farnsworth
 # Install dependencies and run the app
 npm install && npm start
 ```
 
-Learn more about Electron and its API in the [documentation](http://electron.atom.io/docs/latest).
-
-#### License [CC0 (Public Domain)](LICENSE.md)
+#### License [CCAL-4.0](LICENSE.md)
