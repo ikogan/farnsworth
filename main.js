@@ -12,7 +12,14 @@ let mainWindow;
 
 function createWindow () {
     // Create the browser window.
-    mainWindow = new BrowserWindow();
+    mainWindow = new BrowserWindow({
+        movable: false,
+        fullscreen: true,
+        title: 'Farnsworth Launcher',
+        frame: false,
+        backgroundColor: '#000',
+        titleBarStyle: 'hidden'
+    });
     mainWindow.setFullScreen(true);
 
     // and load the index.html of the app.
@@ -28,6 +35,12 @@ function createWindow () {
         // when you should delete the corresponding element.
         mainWindow = null;
     });
+
+    mainWindow.on('app-command', function(ev, command) {
+        if(command === 'browser-backward' && someWindow.webContents.canGoBack()) {
+            someWindow.webContents.goBack();
+        }
+    })
 }
 
 // This method will be called when Electron has finished

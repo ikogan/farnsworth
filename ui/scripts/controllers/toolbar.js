@@ -1,14 +1,22 @@
 'use strict';
 
 angular.module('farnsworth')
-    .controller('ToolbarController', function($scope, $timeout) {
-        $scope.dateFormat = 'MMMM d, y h:mm a';
+    .controller('ToolbarController', function($timeout, $rootScope, Toolbar) {
+        var self = this;
+
+        self.dateFormat = 'MMMM d, y h:mm a';
+        self.toolbar = Toolbar;
 
         function displayDate() {
-            $scope.currentDate = new Date();
+            self.currentDate = new Date();
 
-            $timeout(displayDate, (60-$scope.currentDate.getSeconds())*1000);
+            $timeout(displayDate, (60-self.currentDate.getSeconds())*1000);
         }
 
         displayDate();
+    })
+    .service('Toolbar', function() {
+        return {
+            editing: false
+        };
     });

@@ -14,3 +14,21 @@ body {
 .clickable {
     cursor: pointer;
 }
+
+md-input-container + .md-button {
+    height: 1em;
+}
+
+.category {
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
+.category-header {
+    color: white;
+}
+
+.category-tiles md-card {
+    width: 17em;
+    height: 7em;
+}

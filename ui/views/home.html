@@ -5,6 +5,19 @@
         and tiles.</p>
     </md-card-content>
     <md-card-actions layout="row" layout-align="end center">
-      <md-button ng-click='controller.addTile();'>Add Tile</md-button>
+        <md-button ng-click='controller.addTile();'>Add Tile</md-button>
     </md-card-actions>
 </md-card>
+
+<div layout="column" class='category' ng-repeat="category in controller.categories">
+    <div class='category-header'>
+        <h2>{{ category.name }}</h2>
+    </div>
+    <div class='category-tiles' layout="row">
+        <md-card ng-repeat="tile in category.tiles" ng-style='controller.getTileStyle(tile);'
+            ng-mousedown='controller.hold($event, tile);' ng-mouseup='controller.release($event);'
+            ng-keydown='controller.hold($event, tile);' ng-keyup='controller.release($event);'>
+            {{ tile.name }}
+        </md-card>
+    </div>
+</div>

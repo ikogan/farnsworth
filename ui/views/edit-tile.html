@@ -11,8 +11,8 @@
                 <md-icon md-ink-ripple aria-label="Add Category" class='clickable'
                     ng-click='controller.addCategory();'>add_circle</md-icon>
                 <md-select placeholder="Category" ng-model="controller.tile.category">
-                    <md-option ng-value='category' ng-repeat='category in controller.categories'>
-                        {{ category }}
+                    <md-option ng-value='category.name' ng-repeat='category in controller.categories'>
+                        {{ category.name }}
                     </md-option>
                 </md-select>
             </md-input-container>
@@ -21,19 +21,25 @@
                     label="Background Color" icon="format_color_fill"
                     md-color-open-on-input="true"></div>
                 <div md-color-picker ng-model="controller.tile.textColor"
-                    label="Background Color" icon="format_color_text"
+                    label="Text Color" icon="format_color_text"
                     md-color-open-on-input="true"></div>
             </div>
-            <md-input-container class='md-block'>
-                <label>Command</label>
-                <md-icon>code</md-icon>
-                <input ng-model='controller.tile.command' type='text' />
-            </md-input-container>
-            <md-input-container class='md-block'>
-                <label>Image Path</label>
-                <md-icon>image</md-icon>
-                <input ng-model='controller.tile.image' type='text' />
-            </md-input-container>
+            <div layout='row'>
+                <md-input-container flex class='md-block'>
+                    <label>Command</label>
+                    <md-icon>code</md-icon>
+                    <input flex ng-model='controller.tile.command' type='text' />
+                </md-input-container>
+                <md-button class='md-raised' ng-click='controller.browseFile("command", controller.tile.command)'>Browse</md-button>
+            </div>
+            <div layout='row'>
+                <md-input-container flex class='md-block'>
+                    <label>Image Path</label>
+                    <md-icon>image</md-icon>
+                    <input flex ng-model='controller.tile.image' type='text' />
+                </md-input-container>
+                <md-button class='md-raised' ng-click='controller.browseFile("image", controller.tile.image)'>Browse</md-button>
+            </div>
         </form>
     </md-card-content>
     <md-card-actions>
