@@ -74,6 +74,9 @@ angular.module('farnsworth')
                 .then(function(category) {
                     self.categories[category] = {
                         name: category,
+                        order: _.reduce(self.categories, function(max, category) {
+                            return category.order > max ? category.order : max;
+                        }) + 1,
                         tiles: []
                     };
                     self.tile.category = category;

@@ -16,7 +16,7 @@ body {
 }
 
 md-input-container + .md-button {
-    height: 1em;
+    height: 5px;
 }
 
 .category {
@@ -29,6 +29,13 @@ md-input-container + .md-button {
 }
 
 .category-tiles md-card {
-    width: 17em;
-    height: 7em;
+    width: 200px;
+    height: 110px;
+}
+
+.category-tiles .tile-selected {
+    width: 220px;
+    height: 130px;
+    margin-top: -1px;
+    margin-left: -1px;
 }

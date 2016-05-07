@@ -8,6 +8,7 @@ angular
         'ngMessages',
         'ngRoute',
         'ngSanitize',
+        'cfp.hotkeys',
         'mdColorPicker'
     ])
     .config(function ($routeProvider) {

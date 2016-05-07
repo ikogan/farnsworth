@@ -15,6 +15,7 @@
     </div>
     <div class='category-tiles' layout="row">
         <md-card ng-repeat="tile in category.tiles" ng-style='controller.getTileStyle(tile);'
+            ng-class='{"tile-selected": controller.selectedTile === tile}'
             ng-mousedown='controller.hold($event, tile);' ng-mouseup='controller.release($event);'
             ng-keydown='controller.hold($event, tile);' ng-keyup='controller.release($event);'>
             {{ tile.name }}
