@@ -19,6 +19,13 @@ md-input-container + .md-button {
     height: 5px;
 }
 
+.vertical-divider {
+    border-top-width: 0;
+    border-right-width: 1px;
+    border-right-style: solid;
+    height: 100%;
+}
+
 .category {
     margin-left: 1em;
     margin-right: 1em;

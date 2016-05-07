@@ -1,11 +1,10 @@
 'use strict';
 
 angular.module('farnsworth')
-    .controller('ToolbarController', function($timeout, $rootScope, Toolbar) {
+    .controller('ToolbarController', function($timeout) {
         var self = this;
 
         self.dateFormat = 'MMMM d, y h:mm a';
-        self.toolbar = Toolbar;
 
         function displayDate() {
             self.currentDate = new Date();
@@ -14,9 +13,4 @@ angular.module('farnsworth')
         }
 
         displayDate();
-    })
-    .service('Toolbar', function() {
-        return {
-            editing: false
-        };
     });

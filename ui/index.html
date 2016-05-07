@@ -12,12 +12,9 @@
     </head>
     <body ng-cloak>
         <md-toolbar ng-controller='ToolbarController as controller'>
-            <div ng-if='!controller.toolbar.editing' class='md-toolbar-tools' layout='row' layout-align='space-between center'>
+            <div class='md-toolbar-tools' layout='row' layout-align='space-between center'>
                 <div></div>
-                <div>{{ currentDate|date:dateFormat }}</div>
-            </div>
-            <div ng-if='controller.toolbar.editing' class='toolbar-editing'>
-                <md-icon>edit</md-icon>
+                <div>{{ controller.currentDate|date:controller.dateFormat }}</div>
             </div>
         </md-toolbar>
         <md-container>

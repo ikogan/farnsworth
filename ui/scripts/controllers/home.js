@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('farnsworth')
-    .controller('HomeController', function($location, $mdToast, $timeout,
-            $scope, hotkeys, SettingsService, Toolbar) {
+    .controller('HomeController', function($location, $mdToast, $mdDialog, $timeout,
+            $scope, hotkeys, SettingsService) {
         var self = this;
         var constants = {
             holdTime: 2000,
@@ -10,6 +10,7 @@ angular.module('farnsworth')
         };
 
         self.holding = null;
+        self.editing = false;
         self.categories = {};
         self.categoryList = [];
         self.selectedCategory = null;
@@ -42,7 +43,7 @@ angular.module('farnsworth')
                 combo: 'right',
                 description: 'Select the tile to the right of the currently selected tile.',
                 callback: function() {
-                    if(self.selectedCategory.tiles.length-1 >= self.selectedTileIndex) {
+                    if(self.selectedTileIndex < self.selectedCategory.tiles.length - 1) {
                         self.selectedTile = self.selectedCategory.tiles[++self.selectedTileIndex];
                     }
                 }
@@ -59,8 +60,8 @@ angular.module('farnsworth')
             });
 
             var selectProperCategoryTile = function() {
-                if(self.selectedCategory.tiles.length <= self.selectedTileIndex) {
-                    self.selectedTileIndex--;
+                if(self.selectedTileIndex >= self.selectedCategory.tiles.length) {
+                    self.selectedTileIndex = self.selectedCategory.tiles.length - 1;
                 }
 
                 self.selectedTile = self.selectedCategory.tiles[self.selectedTileIndex];
@@ -70,7 +71,7 @@ angular.module('farnsworth')
                 combo: 'down',
                 description: 'Select the tile below the currently selected tile.',
                 callback: function() {
-                    if(self.categoryList.length-1 >= self.selectedCategoryIndex) {
+                    if(self.selectedCategoryIndex < self.categoryList.length - 1) {
                         self.selectedCategory = self.categoryList[++self.selectedCategoryIndex];
 
                         selectProperCategoryTile();
@@ -99,7 +100,7 @@ angular.module('farnsworth')
                         self.holding = $timeout(function() {
                             self.holding = null;
                             self.startEditing(self.selectedTile);
-                        });
+                        }, self.constants.holdTime);
                     }
                 }
             });
@@ -122,7 +123,7 @@ angular.module('farnsworth')
         };
 
         self.getTileStyle = function(tile) {
-            if(Toolbar.editing && Toolbar.editing === tile) {
+            if(self.editing && self.selectedTile === tile) {
                 return {
                     'background-color': tinycolor(tile.backgroundColor).darken(constants.editingDarkness).toString(),
                     'color': tinycolor(tile.textColor).darken(constants.editingDarkness).toString()
@@ -140,6 +141,15 @@ angular.module('farnsworth')
         };
 
         self.startEditing = function(tile) {
-            Toolbar.editing = tile;
+            self.editing = true;
+
+            $mdDialog.show({
+                controller: function() {
+
+                },
+                templateUrl: 'views/dialogs/edit-tile-popup.html',
+                parent: angular.element(document.body),
+                clickOutsideToClose:true
+            });
         };
     });
