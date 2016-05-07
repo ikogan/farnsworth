@@ -1,15 +1,19 @@
-<div layout="row" layout-align="center space-between">
-    <md-button>
+<div class='edit-tile-popup' layout="row" layout-align="center space-between">
+    <md-button ng-class='{"button-active": actions[action] === "arrange"}'>
         <md-icon>compare_arrows</md-icon>
+        Arrange
     </md-button>
-    <md-button>
+    <md-button ng-class='{"button-active": actions[action] === "edit"}'>
         <md-icon>edit</md-icon>
+        Edit
     </md-button>
-    <md-button>
+    <md-button ng-class='{"button-active": actions[action] === "cancel"}'>
         <md-icon>cancel</md-icon>
+        Cancel
     </md-button>
     <md-divider class="vertical-divider"></md-divider>
-    <md-button>
+    <md-button ng-class='{"button-active": actions[action] === "delete"}' class='md-warn'>
         <md-icon>delete</md-icon>
+        Delete
     </md-button>
 </div>

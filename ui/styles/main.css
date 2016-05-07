@@ -26,6 +26,14 @@ md-input-container + .md-button {
     height: 100%;
 }
 
+.button-active {
+    background-color: rgba(0,0,0,0.098392);
+}
+
+.edit-tile-popup {
+    font-size: 24pt;
+}
+
 .category {
     margin-left: 1em;
     margin-right: 1em;
