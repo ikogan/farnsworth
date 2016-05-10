@@ -18,7 +18,9 @@
             ng-class='{"tile-selected": controller.selectedTile === tile}'
             ng-mousedown='controller.hold($event, tile);' ng-mouseup='controller.release($event);'
             ng-keydown='controller.hold($event, tile);' ng-keyup='controller.release($event);'>
-            {{ tile.name }}
+            <div>
+                <span>{{ tile.name }}</span>
+            </div>
         </md-card>
     </div>
 </div>

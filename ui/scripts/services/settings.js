@@ -40,6 +40,8 @@ angular.module('farnsworth')
 
                     deferred.resolve(service.settings);
                 });
+            } else {
+                deferred.resolve(service.settings);
             }
 
             return deferred.promise;

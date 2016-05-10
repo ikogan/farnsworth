@@ -1,13 +1,14 @@
 'use strict';
 
 angular.module('farnsworth')
-    .controller('EditTileController', function($mdDialog, $mdToast, $window, $scope, $rootScope, SettingsService) {
+    .controller('EditTileController', function($mdDialog, $mdToast, $window, $scope,
+            $rootScope, SettingsService, $routeParams) {
         var self = this;
         var dialog = require('electron').remote.dialog;
 
         var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
 
-        self.newTile = true;
+        self.newTile = _.has($routeParams, 'category') && _.has($routeParams, 'tile');
         self.tile = {
             backgroundColor: randomColor,
             textColor: tinycolor(randomColor).complement().toHexString()
@@ -19,6 +20,11 @@ angular.module('farnsworth')
             }
 
             self.categories = settings.categories;
+
+            if($routeParams.category && _.has(self.categories, $routeParams.category) &&
+                $routeParams.tile && $routeParams.tile < self.categories[$routeParams.category].tiles.length) {
+                self.tile = self.categories[$routeParams.category].tiles[$routeParams.tile];
+            }
         }).catch(function(error) {
             $mdToast.show(
               $mdToast.simple()
@@ -45,7 +51,12 @@ angular.module('farnsworth')
         };
 
         self.save = function(tile) {
-            self.categories[tile.category].tiles.push(tile);
+            if(_.has($routeParams, 'tile')) {
+                self.categories[tile.category].tiles[$routeParams['tile']] = tile;
+            } else {
+                self.categories[tile.category].tiles.push(tile);
+            }
+
             SettingsService.save().then(function() {
                 $window.history.back();
             }).catch(function(error) {
@@ -80,7 +91,6 @@ angular.module('farnsworth')
                         tiles: []
                     };
                     self.tile.category = category;
-
 
                     $mdToast.show(
                       $mdToast.simple()
