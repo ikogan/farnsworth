@@ -1,5 +1,8 @@
 'use strict';
 
+/**
+ * Controller for the system toolbar, because.
+ */
 angular.module('farnsworth')
     .controller('ToolbarController', function($timeout) {
         var self = this;

@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * Error dialog that handles situations where errors
+ * prevent the application from functioning normally, like
+ * route change errors.
+ */
 angular.module('farnsworth')
     .factory('$error', function($mdDialog) {
         return function(rejection, action, ev) {

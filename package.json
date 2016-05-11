@@ -39,6 +39,7 @@
     "material-design-icons": "^2.2.3",
     "md-color-picker": "^0.2.6",
     "mousetrap": "^1.5.3",
-    "roboto-fontface": "^0.4.5"
+    "roboto-fontface": "^0.4.5",
+    "slash": "^1.0.0"
   }
 }

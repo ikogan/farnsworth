@@ -1,11 +1,17 @@
 'use strict';
 
+/**
+ * Controller for editing a tile or creating a new tile.
+ *
+ * TODO: Add form validation and keyboard navigation.
+ */
 angular.module('farnsworth')
     .controller('EditTileController', function($mdDialog, $mdToast, $window, $scope,
             $rootScope, SettingsService, $routeParams) {
         var self = this;
         var dialog = require('electron').remote.dialog;
 
+        // We're going to try and generate a colorscheme for users by default.
         var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
 
         self.newTile = _.has($routeParams, 'category') && _.has($routeParams, 'tile');
@@ -21,6 +27,7 @@ angular.module('farnsworth')
 
             self.categories = settings.categories;
 
+            // Figure out which tile to edit, if any.
             if($routeParams.category && _.has(self.categories, $routeParams.category) &&
                 $routeParams.tile && $routeParams.tile < self.categories[$routeParams.category].tiles.length) {
                 self.tile = self.categories[$routeParams.category].tiles[$routeParams.tile];
@@ -33,6 +40,12 @@ angular.module('farnsworth')
             window.history.goBack();
         });
 
+        /**
+         * Browse for a file and set the specified property.
+         *
+         * @param  {String} property     Property on the tile to set
+         * @param  {[type]} currentValue Existing value, so users start at the closest spot to the current path.
+         */
         self.browseFile = function(property, currentValue) {
             dialog.showOpenDialog({
                 title: 'Tile Command',
@@ -40,16 +53,25 @@ angular.module('farnsworth')
                 defaultPath: currentValue
             }, function(filename) {
                 if(filename) {
-                    self.tile[property] = filename;
+                    // We always get an array back but we know we only want one value
+                    self.tile[property] = filename[0];
                     $scope.$apply();
                 }
             });
         };
 
+        /**
+         * Cancel editing, return to the previous page.
+         */
         self.cancel = function() {
             $window.history.back();
         };
 
+        /**
+         * Save the changes. This will write the JSON file as well.
+         *
+         * @param  {object} tile The tile to save.
+         */
         self.save = function(tile) {
             if(_.has($routeParams, 'tile')) {
                 self.categories[tile.category].tiles[$routeParams['tile']] = tile;
@@ -67,6 +89,9 @@ angular.module('farnsworth')
             });
         };
 
+        /**
+         * Add a new category to the list of categories.
+         */
         self.addCategory = function() {
             $mdDialog.show({
                     controller: function($scope) {
@@ -85,11 +110,19 @@ angular.module('farnsworth')
                 .then(function(category) {
                     self.categories[category] = {
                         name: category,
-                        order: _.reduce(self.categories, function(max, category) {
-                            return category.order > max ? category.order : max;
-                        }) + 1,
                         tiles: []
                     };
+
+                    // Compute the new category's order based on the existing
+                    // list of categories.
+                    if(_.size(self.categories) == 1) {
+                        self.categories[category].order = 1;
+                    } else {
+                        self.categories[category].order = _.reduce(self.categories, function(max, category) {
+                            return (category.order && category.order > max) ? category.order : (max || 0);
+                        }) + 1;
+                    }
+
                     self.tile.category = category;
 
                     $mdToast.show(
@@ -98,4 +131,14 @@ angular.module('farnsworth')
                             .hideDelay(3000));
                 });
         };
+    })
+    /**
+     * Filter out any transient categories from our list of categories.
+     */
+    .filter('filterTransient', function() {
+        return function(input) {
+            return _.filter(input, function(category) {
+                return !category.transient;
+            });
+        }
     });

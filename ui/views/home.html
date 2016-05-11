@@ -1,5 +1,9 @@
-<md-card ng-if='controller.categoryList.length == 0'>
-    <img ng-src="./images/zenith-television.jpg" class="md-card-image" alt="No Content Header" />
+<div layout="row" layout-align="center center">
+    <md-progress-circular ng-if="controller.loading" md-mode="indeterminate"  md-diameter="200" />
+</div>
+
+<md-card ng-if='!controller.loading && controller.categoryList.length == 0'>
+    <img src='./images/zenith-television.jpg' class="md-card-image" alt="No Content Header" />
     <md-card-content>
         <p>Welcome to Farnsworth. To get started, add some categories
         and tiles.</p>
@@ -9,7 +13,7 @@
     </md-card-actions>
 </md-card>
 
-<div layout="column" class='category' ng-repeat="category in controller.categories">
+<div ng-if='!controller.loading' layout="column" class='category' ng-repeat="category in controller.categoryList track by $index">
     <div class='category-header'>
         <h2>{{ category.name }}</h2>
     </div>

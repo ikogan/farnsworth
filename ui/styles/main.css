@@ -44,10 +44,11 @@ md-input-container + .md-button {
 }
 
 .category-tiles md-card {
-    width: 200px;
+    width: 220px;
     height: 110px;
     line-height: 110px;
     text-align: center;
+    background-size: 220px 110px;
 }
 
 .category-tiles md-card div {
@@ -58,12 +59,6 @@ md-input-container + .md-button {
     font-size: 16pt;
 }
 
-.category-tiles .tile-selected div {
-    height: 130px;
-    line-height: 130px;
-    padding: 40px;
-}
-
 .category-tiles md-card div span {
   display: inline-block;
   vertical-align: middle;
@@ -72,8 +67,15 @@ md-input-container + .md-button {
 }
 
 .category-tiles .tile-selected {
-    width: 220px;
+    width: 250px;
     height: 130px;
     margin-top: -1px;
     margin-left: -1px;
+    background-size: 250px 130px;
+}
+
+.category-tiles .tile-selected div {
+    height: 130px;
+    line-height: 130px;
+    padding: 40px;
 }

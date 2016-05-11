@@ -1,6 +1,6 @@
 <md-card>
-    <md-card-title ng-if='controller.isNew'>New Tile</md-card-title>
-    <md-card-title ng-if='!controller.isNew'>Edit Tile</md-card-title>
+    <md-card-title ng-if='controller.newTile'>New Tile</md-card-title>
+    <md-card-title ng-if='!controller.newTile'>Edit Tile</md-card-title>
     <md-card-content class='md-inline-form' layout='column'>
         <form name='tileForm'>
             <md-input-container class='md-block'>
@@ -11,7 +11,7 @@
                 <md-icon md-ink-ripple aria-label="Add Category" class='clickable'
                     ng-click='controller.addCategory();'>add_circle</md-icon>
                 <md-select placeholder="Category" ng-model="controller.tile.category">
-                    <md-option ng-value='category.name' ng-repeat='category in controller.categories'>
+                    <md-option ng-value='category.name' ng-repeat='category in controller.categories | filterTransient'>
                         {{ category.name }}
                     </md-option>
                 </md-select>

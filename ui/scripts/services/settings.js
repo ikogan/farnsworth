@@ -52,8 +52,14 @@ angular.module('farnsworth')
          */
         service.clean = function() {
             if(_.has(service.settings, 'categories')) {
-                _.remove(service.settings.categories, function(category) {
-                    return !category.tiles || category.tiles.length === 0;
+                service.settings.categories = _.remove(service.settings.categories, function(category) {
+                    return !category.tiles || category.tiles.length === 0 || category.transient;
+                });
+
+                _.each(service.settings.categories, function(category) {
+                    category.tiles = _.remove(category.tiles, function(tile) {
+                        return tile.transient;
+                    })
                 });
             }
         };
@@ -72,7 +78,7 @@ angular.module('farnsworth')
 
             service.clean();
 
-            fs.writeFile(path, JSON.stringify(service.settings, '4'), function(error) {
+            fs.writeFile(path, JSON.stringify(service.settings, null, 4), function(error) {
                 if(error) {
                     deferred.reject();
                 } else {
