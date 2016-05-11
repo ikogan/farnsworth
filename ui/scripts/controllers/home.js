@@ -5,8 +5,8 @@ angular.module('farnsworth')
             $scope, hotkeys, SettingsService) {
         var self = this;
         var constants = {
-            holdTime: 2000,
-            editingDarkness: 20
+            holdTime: 1500,
+            editingSaturation: 50
         };
 
         self.holding = null;
@@ -40,15 +40,22 @@ angular.module('farnsworth')
                 self.selectedTile = self.selectedCategory.tiles[self.selectedTileIndex];
             }
 
+            self.setupBindings();
+        };
+
+        self.setupBindings = function() {
             hotkeys.bindTo($scope).add({
                 combo: 'right',
                 description: 'Select the tile to the right of the currently selected tile.',
                 callback: function() {
-                    if(self.editing) {
-                    } else if(self.moving) {
-
-                    } else {
+                    if(!self.editing) {
                         if(self.selectedTileIndex < self.selectedCategory.tiles.length - 1) {
+                            if(self.moving) {
+                                var temp = self.selectedCategory.tiles[self.selectedTileIndex+1];
+                                self.selectedCategory.tiles[self.selectedTileIndex+1] = self.selectedTile;
+                                self.selectedCategory.tiles[self.selectedTileIndex] = temp;
+                            }
+
                             self.selectedTile = self.selectedCategory.tiles[++self.selectedTileIndex];
                         }
                     }
@@ -59,11 +66,14 @@ angular.module('farnsworth')
                 combo: 'left',
                 description: 'Select the tile to the right of the currently selected tile.',
                 callback: function() {
-                    if(self.editing) {
-                    } else if(self.moving) {
-
-                    } else {
+                    if(!self.editing) {
                         if(self.selectedTileIndex > 0) {
+                            if(self.moving) {
+                                var temp = self.selectedCategory.tiles[self.selectedTileIndex-1];
+                                self.selectedCategory.tiles[self.selectedTileIndex-1] = self.selectedTile;
+                                self.selectedCategory.tiles[self.selectedTileIndex] = temp;
+                            }
+
                             self.selectedTile = self.selectedCategory.tiles[--self.selectedTileIndex];
                         }
                     }
@@ -73,19 +83,28 @@ angular.module('farnsworth')
             var selectProperCategoryTile = function() {
                 if(self.selectedTileIndex >= self.selectedCategory.tiles.length) {
                     self.selectedTileIndex = self.selectedCategory.tiles.length - 1;
+
+                    // When moving, self.selectedTile doesn't change, so this is safe.
+                    if(self.moving) {
+                        self.selectedCategory.tiles.push(self.selectedTile);
+                    }
+                } else if(self.moving) {
+                    self.selectedCategory.tiles.splice(self.selectedTileIndex, 0, self.selectedTile);
                 }
 
                 self.selectedTile = self.selectedCategory.tiles[self.selectedTileIndex];
-            }
+            };
 
             hotkeys.bindTo($scope).add({
                 combo: 'down',
                 description: 'Select the tile below the currently selected tile.',
                 callback: function() {
-                    if(self.editing) {
-
-                    } else if(self.moving) {
+                    if(!self.editing) {
                         if(self.selectedCategoryIndex < self.categoryList.length - 1) {
+                            if(self.moving) {
+                                self.selectedCategory.tiles.splice(self.selectedTileIndex);
+                            }
+
                             self.selectedCategory = self.categoryList[++self.selectedCategoryIndex];
 
                             selectProperCategoryTile();
@@ -123,6 +142,15 @@ angular.module('farnsworth')
                         if(self.editing) {
                             self.holding = null;
                         } else if(self.moving) {
+                            if(action === 'keyup') {
+                                self.moving = false;
+                                SettingsService.save().catch(function(error) {
+                                    $mdToast.show(
+                                      $mdToast.simple()
+                                        .textContent(`Error saving tile: ${error}`)
+                                            .hideDelay(3000));
+                                });
+                            }
                         } else {
                             if(!self.holding) {
                                 addEnterHotkey('keyup');
@@ -143,7 +171,7 @@ angular.module('farnsworth')
             }
 
             addEnterHotkey('keydown');
-        };
+        }
 
         self.addTile = function() {
             $location.path('/edit-tile');
@@ -154,17 +182,35 @@ angular.module('farnsworth')
         };
 
         self.getTileStyle = function(tile) {
-            if(self.moving && self.selectedTile === tile) {
-                return {
-                    'background-color': tinycolor(tile.backgroundColor).darken(constants.editingDarkness).toString(),
-                    'color': tinycolor(tile.textColor).darken(constants.editingDarkness).toString()
+            var style;
+
+            /*if(self.moving && self.selectedTile !== tile) {
+                style = {
+                    'background-color': tinycolor(tile.backgroundColor).desaturate(constants.editingSaturation).toString(),
+                    'color': tinycolor(tile.textColor).desaturate(constants.editingSaturation).toString()
                 };
-            } else {
-                return {
+
+                if(tile.image) {
+                    style['background-image']: 'url("' + tile.image + '")',
+                }
+            } else {*/
+                style = {
                     'background-color': tile.backgroundColor,
                     'color': tile.textColor
                 };
+
+                if(tile.image) {
+                    style['background-image'] = 'url("' + tile.image + '")';
+                }
+            //}
+
+            if(self.moving && self.selectedTile !== tile) {
+                style['filter'] = 'saturate(' + constants.editingSaturation + '%)';
             }
+
+            console.log(style);
+
+            return style;
         };
 
         self.activate = function(tile) {
@@ -224,6 +270,7 @@ angular.module('farnsworth')
                 }
             }).finally(function() {
                 self.editing = false;
+                self.setupBindings();
             });
         };
     });

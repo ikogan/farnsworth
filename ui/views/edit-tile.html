@@ -1,6 +1,6 @@
 <md-card>
-    <md-card-title ng-if='controller.tile.id'>Edit Tile</md-card-title>
-    <md-card-title ng-if='!controller.tile.id'>New Tile</md-card-title>
+    <md-card-title ng-if='controller.isNew'>New Tile</md-card-title>
+    <md-card-title ng-if='!controller.isNew'>Edit Tile</md-card-title>
     <md-card-content class='md-inline-form' layout='column'>
         <form name='tileForm'>
             <md-input-container class='md-block'>

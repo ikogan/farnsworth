@@ -20,6 +20,12 @@ angular
                     controllerAs: 'controller'
                 })
                 .when('/edit-tile', {
+                    title: 'New Tile',
+                    templateUrl: 'views/edit-tile.html',
+                    controller: 'EditTileController',
+                    controllerAs: 'controller'
+                })
+                .when('/edit-tile/:category/:tile', {
                     title: 'Edit Tile',
                     templateUrl: 'views/edit-tile.html',
                     controller: 'EditTileController',
