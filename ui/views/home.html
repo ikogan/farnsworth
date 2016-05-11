@@ -1,11 +1,11 @@
-<md-card ng-if='!controller.categories'>
+<md-card ng-if='controller.categoryList.length == 0'>
     <img ng-src="./images/zenith-television.jpg" class="md-card-image" alt="No Content Header" />
     <md-card-content>
         <p>Welcome to Farnsworth. To get started, add some categories
         and tiles.</p>
     </md-card-content>
     <md-card-actions layout="row" layout-align="end center">
-        <md-button ng-click='controller.addTile();'>Add Tile</md-button>
+        <md-button class='button-active' ng-click='controller.addTile();'>Add Tile</md-button>
     </md-card-actions>
 </md-card>
 
