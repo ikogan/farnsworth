@@ -6,22 +6,24 @@
  * is used to select the tile, move tiles around, and activate tiles.
  */
 angular.module('farnsworth')
-    .controller('HomeController', function($location, $mdToast, $mdDialog, $timeout,
-            $scope, hotkeys, SettingsService) {
+    .controller('HomeController', function($location, $mdToast, $mdDialog, $timeout, $q,
+            $scope, hotkeys, SettingsService, HotkeyDialog) {
         var slash = require('slash');               // Convert Windows paths to something we can use in `file:///` urls.
         var app = require('electron').remote.app;   // Needed to close the application.
 
         var self = this;
         var constants = {
-            holdTime: 1500,                     // Time in MS we have to hold enter before we popup the edit dialog
-            editingSaturation: 50,              // Saturation factor to apply to non-selected tiles when we're rearranging tiles.
+            holdTime: 1000,                     // Time in MS we have to hold enter before we popup the edit dialog
             systemBackgroundColor: '#4B585C',   // Background color of the hardcoded "System" category tiles.
             systemTextColor: '#FFFFFF'          // Text color of the hardcoded "System" category tiles.
         };
 
         self.loading = true;                    // Used to track when to show the loading spinner.
-        self.holding = null;                    // Set to a $timeout promise when we're holding enter on a tile.
-        self.editing = false;                   // True when the edit popup is displayed, so we don't do weird things with tiles in the background.
+        self.actionHold = {                     // Promise used to track when we're holding down the action button.
+            defered: null,
+            promise: null
+        };
+        self.actionTimeout = null;              // Set to a $timeout promise when we're holding enter on a tile.
         self.moving = false;                    // True when we're arranging a tile on the screen.
         self.categories = {};                   // Object containing all categories. Note: This is a reference to data that is read/written from the JSON file.
         self.categoryList = [];                 // Ordered list of categories.
@@ -106,7 +108,7 @@ angular.module('farnsworth')
                     'transient': true,
                     'backgroundColor': constants.systemBackgroundColor,
                     'textColor': constants.systemTextColor,
-                    'command': 'about:farnsworth/settings'
+                    'command': 'about:farnsworth/app-settings'
                 },{
                     'name': 'Exit',
                     'category': 'System',
@@ -133,16 +135,14 @@ angular.module('farnsworth')
                 combo: 'right',
                 description: 'Select the tile to the right of the currently selected tile.',
                 callback: function() {
-                    if(!self.editing) {
-                        if(self.selectedTileIndex < self.selectedCategory.tiles.length - 1) {
-                            if(self.moving) {
-                                var temp = self.selectedCategory.tiles[self.selectedTileIndex+1];
-                                self.selectedCategory.tiles[self.selectedTileIndex+1] = self.selectedTile;
-                                self.selectedCategory.tiles[self.selectedTileIndex] = temp;
-                            }
-
-                            self.selectedTile = self.selectedCategory.tiles[++self.selectedTileIndex];
+                    if(self.selectedTileIndex < self.selectedCategory.tiles.length - 1) {
+                        if(self.moving) {
+                            var temp = self.selectedCategory.tiles[self.selectedTileIndex+1];
+                            self.selectedCategory.tiles[self.selectedTileIndex+1] = self.selectedTile;
+                            self.selectedCategory.tiles[self.selectedTileIndex] = temp;
                         }
+
+                        self.selectedTile = self.selectedCategory.tiles[++self.selectedTileIndex];
                     }
                 }
             });
@@ -152,16 +152,14 @@ angular.module('farnsworth')
                 combo: 'left',
                 description: 'Select the tile to the right of the currently selected tile.',
                 callback: function() {
-                    if(!self.editing) {
-                        if(self.selectedTileIndex > 0) {
-                            if(self.moving) {
-                                var temp = self.selectedCategory.tiles[self.selectedTileIndex-1];
-                                self.selectedCategory.tiles[self.selectedTileIndex-1] = self.selectedTile;
-                                self.selectedCategory.tiles[self.selectedTileIndex] = temp;
-                            }
-
-                            self.selectedTile = self.selectedCategory.tiles[--self.selectedTileIndex];
+                    if(self.selectedTileIndex > 0) {
+                        if(self.moving) {
+                            var temp = self.selectedCategory.tiles[self.selectedTileIndex-1];
+                            self.selectedCategory.tiles[self.selectedTileIndex-1] = self.selectedTile;
+                            self.selectedCategory.tiles[self.selectedTileIndex] = temp;
                         }
+
+                        self.selectedTile = self.selectedCategory.tiles[--self.selectedTileIndex];
                     }
                 }
             });
@@ -189,20 +187,18 @@ angular.module('farnsworth')
                 combo: 'down',
                 description: 'Select the tile below the currently selected tile.',
                 callback: function() {
-                    if(!self.editing) {
-                        if(self.selectedCategoryIndex < self.categoryList.length - 1) {
-                            if(self.moving) {
-                                if(self.categoryList[self.selectedCategoryIndex + 1].transient) {
-                                    return;
-                                }
-
-                                self.selectedCategory.tiles.splice(self.selectedTileIndex, 1);
+                    if(self.selectedCategoryIndex < self.categoryList.length - 1) {
+                        if(self.moving) {
+                            if(self.categoryList[self.selectedCategoryIndex + 1].transient) {
+                                return;
                             }
 
-                            self.selectedCategory = self.categoryList[++self.selectedCategoryIndex];
-
-                            selectProperCategoryTile();
+                            self.selectedCategory.tiles.splice(self.selectedTileIndex, 1);
                         }
+
+                        self.selectedCategory = self.categoryList[++self.selectedCategoryIndex];
+
+                        selectProperCategoryTile();
                     }
                 }
             });
@@ -212,20 +208,18 @@ angular.module('farnsworth')
                 combo: 'up',
                 description: 'Select the tile above the currently selected tile.',
                 callback: function() {
-                    if(!self.editing) {
-                        if(self.selectedCategoryIndex > 0) {
-                            if(self.moving) {
-                                if(self.categoryList[self.selectedCategoryIndex - 1].transient) {
-                                    return;
-                                }
-
-                                self.selectedCategory.tiles.splice(self.selectedTileIndex, 1);
+                    if(self.selectedCategoryIndex > 0) {
+                        if(self.moving) {
+                            if(self.categoryList[self.selectedCategoryIndex - 1].transient) {
+                                return;
                             }
 
-                            self.selectedCategory = self.categoryList[--self.selectedCategoryIndex];
-
-                            selectProperCategoryTile();
+                            self.selectedCategory.tiles.splice(self.selectedTileIndex, 1);
                         }
+
+                        self.selectedCategory = self.categoryList[--self.selectedCategoryIndex];
+
+                        selectProperCategoryTile();
                     }
                 }
             });
@@ -236,55 +230,98 @@ angular.module('farnsworth')
             var addEnterHotkey = function(action) {
                 hotkeys.del('enter');
 
-                hotkeys.bindTo($scope).add({
-                    combo: 'enter',
-                    action: action,
-                    description: 'Activate the selected tile. Hold to edit instead.',
-                    callback: function() {
-                        if(self.editing) {
-                            self.holding = null;
-                        } else if(self.moving) {
-                            // When we're moving, keyup will drop the tile, saving the
-                            // location.
-                            if(action === 'keyup') {
-                                self.moving = false;
-                                SettingsService.save().catch(function(error) {
-                                    $mdToast.show(
-                                      $mdToast.simple()
-                                        .textContent(`Error saving tile: ${error}`)
-                                            .hideDelay(3000));
-                                });
-                            }
+                var handler;
+
+                // This is sort of opposite, we're adding an action
+                // when the opposite action was taken. If we're adding
+                // the 'keydown' action, it's because we just released the key.
+                if(action === 'keydown') {
+                    handler = function() {
+                        // The only time we ever want to do anything on keydown
+                        // is if the edit dialog isn't open and we're not moving
+                        // anything.
+                        if(!self.moving) {
+                            // First, setup the opposite hotkey.
+                            addEnterHotkey('keyup');
+
+                            // Set our hold timer, after which, we'll activate
+                            // edit mode.
+                            self.actionTimeout = $timeout(function() {
+                                self.actionTimeout = null;
+
+                                // Transient tiles can't be edited, always
+                                // activate them.
+                                if(!self.selectedTile.transient) {
+                                    self.startEditing(self.selectedTile);
+                                } else {
+                                    self.activate(self.selectedTile);
+                                }
+                            }, constants.holdTime);
+
+                            // Setup our hold promise.
+                            self.actionHold.defered = $q.defer();
+                            self.actionHold.promise = self.actionHold.defered.promise;
+                        }
+                    };
+                } else {
+                    handler = function() {
+                        // Need to make sure we resolve this promise no matter
+                        // what state we're in.
+                        self.actionHold.defered.resolve();
+                        self.actionHold.promise = null;
+
+                        addEnterHotkey('keydown');
+
+                        if(self.moving) {
+                            // If we're moving something, then enter drops
+                            // the tile we're moving.
+                            self.moving = false;
+                            SettingsService.save().catch(function(error) {
+                                $mdToast.show(
+                                  $mdToast.simple()
+                                    .textContent(`Error saving tile: ${error}`)
+                                        .hideDelay(3000));
+                            });
                         } else {
-                            // If we're not already holding enter, start.
-                            if(!self.holding) {
-                                addEnterHotkey('keyup');
-
-                                self.holding = $timeout(function() {
-                                    // Transient tiles can't be edited, always
-                                    // activate them.
-                                    if(!self.selectedTile.transient) {
-                                        self.startEditing(self.selectedTile);
-                                    } else {
-                                        self.activate(self.selectedTile);
-                                    }
-                                }, constants.holdTime);
-                            } else {
-                                // If we're already holding it down, cancel
-                                // the timer and activate the tile.
-                                addEnterHotkey('keydown');
-
-                                $timeout.cancel(self.holding);
-                                self.holding = null;
+                            // If there was ever a timeout, then cancel it
+                            // and activate the tile.
+                            if(self.actionTimeout) {
+                                $timeout.cancel(self.actionTimeout);
+                                self.actionTimeout = null;
                                 self.activate(self.selectedTile);
                             }
                         }
                     }
+                }
+
+                hotkeys.bindTo($scope).add({
+                    combo: 'enter',
+                    action: action,
+                    description: 'Activate the selected tile. Hold to edit instead',
+                    callback: handler
                 });
             }
 
             addEnterHotkey('keydown');
         }
+
+        /**
+         * Disable all key bindings.
+         */
+        self.disableBindings = function() {
+            hotkeys.del('left');
+            hotkeys.del('right');
+            hotkeys.del('up');
+            hotkeys.del('down');
+
+            if(self.actionHold.promise) {
+                self.actionHold.promise.finally(function() {
+                    hotkeys.del('enter');
+                });
+            } else {
+                hotkeys.del('enter');
+            }
+        };
 
         /**
          * Add a new tile.
@@ -318,7 +355,7 @@ angular.module('farnsworth')
         /**
          * Open the application settings.
          */
-        self.settings = function() {
+        self.appSettings = function() {
             $location.path('/settings');
         };
 
@@ -329,33 +366,18 @@ angular.module('farnsworth')
          * @param  {object} tile The tile for which to get the styles.
          */
         self.getTileStyle = function(tile) {
-            var style;
+            var style = {
+                'background-color': tile.backgroundColor,
+                'color': tile.textColor
+            };
 
-            /*if(self.moving && self.selectedTile !== tile) {
-                style = {
-                    'background-color': tinycolor(tile.backgroundColor).desaturate(constants.editingSaturation).toString(),
-                    'color': tinycolor(tile.textColor).desaturate(constants.editingSaturation).toString()
-                };
-
-                if(tile.image) {
-                    style['background-image']: 'url("' + tile.image + '")',
-                }
-            } else {*/
-                style = {
-                    'background-color': tile.backgroundColor,
-                    'color': tile.textColor
-                };
-
-                if(tile.image) {
-                    style['background-image'] = 'url(file:///' + slash(tile.image) + ')';
-                }
-            //}
-
-            if(self.moving && self.selectedTile !== tile) {
-                style['filter'] = 'saturate(' + constants.editingSaturation + '%)';
+            if(tile.image) {
+                style['background-image'] = 'url(file:///' + slash(tile.image) + ')';
             }
 
-            console.log(style);
+            if(self.moving && self.selectedTile !== tile) {
+                style['-webkit-filter'] = 'blur(1px) grayscale(0.4)';
+            }
 
             return style;
         };
@@ -365,8 +387,6 @@ angular.module('farnsworth')
          * @param  {object} tile The tile.
          */
         self.activate = function(tile) {
-            console.log('Launching tile: ', tile);
-
             // Any tile with a command that begins with 'about:farnsworth' is
             // an "internal" command, we handle those by simply taking the remaining
             // string, converting it to camelcase, and, assuming one exists, calling
@@ -375,13 +395,45 @@ angular.module('farnsworth')
             // TODO: Consider how safe this is. Since we're running in Electron and not
             // a traditional browser, it's probably ok and allows users to maybe add more
             // tiles for internal commands?
-            if(tile.command.startsWith('about:farnsworth')) {
+            if(tile.command && tile.command.startsWith('about:farnsworth')) {
                 var func = _.camelCase(tile.command.replace('about:farnsworth/', ''));
 
                 if(_.has(self, func)) {
                     self[func]();
                 }
             }
+        };
+
+        /**
+         * Delete the currently selected tile.
+         */
+        self.deleteTile = function() {
+            self.disableBindings();
+
+            HotkeyDialog()
+                .prompt('Are you sure you want to delete this tile?')
+                .wait(self.actionHold.promise)
+                .show()
+                .then(function(result) {
+                    if(result.caption === 'Yes') {
+                        self.selectedCategory.tiles.splice(self.selectedTileIndex, 1);
+
+                        while(self.selectedCategory.tiles.length == 0) {
+                            self.selectedCategory = self.categoryList[++self.selectedCategoryIndex];
+                        }
+
+                        if(self.selectedTileIndex >= self.selectedCategory.tiles.length) {
+                            self.selectedTileIndex = self.selectedCategory.tiles.length - 1;
+                        }
+
+                        self.selectedTile = self.selectedCategory.tiles[self.selectedTileIndex];
+
+                        return SettingsService.save();
+                    }
+                })
+                .finally(function() {
+                    self.setupBindings();
+                });
         };
 
         /**
@@ -395,61 +447,41 @@ angular.module('farnsworth')
          * @param  {object} tile The tile to edit.
          */
         self.startEditing = function(tile) {
-            self.editing = true;
+            self.disableBindings();
 
-            $mdDialog.show({
-                controller: function(hotkeys, $scope, $mdDialog) {
-                    //TODO: This has to match the order of the buttons in the
-                    // HTML. Rework at some point to make this less terrible.
-                    $scope.actions = [
-                        'arrange', 'edit', 'cancel', 'delete'
-                    ];
-                    $scope.action = 0;
-
-                    // Add left, right, and enter keybindings so we can do this
-                    // with a keyboard/controller.
-                    hotkeys.bindTo($scope).add({
-                        combo: 'right',
-                        description: 'Select the option right of the current option',
-                        callback: function() {
-                            if($scope.action < $scope.actions.length-1) {
-                                $scope.action++;
-                            }
-                        }
-                    });
-
-                    hotkeys.bindTo($scope).add({
-                        combo: 'left',
-                        description: 'Select the option left of the curren options.',
-                        callback: function() {
-                            if($scope.action > 0) {
-                                $scope.action--;
-                            }
-                        }
-                    });
-
-                    hotkeys.bindTo($scope).add({
-                        combo: 'enter',
-                        description: 'Activate the selected option.',
-                        callback: function() {
-                            if(!self.holding) {
-                                $mdDialog.hide($scope.actions[$scope.action]);
-                            }
-                        }
-                    })
-                },
-                templateUrl: 'views/dialogs/edit-tile-popup.html',
-                parent: angular.element(document.body),
-                clickOutsideToClose:true
-            }).then(function(result) {
-                switch(result) {
-                    case 'arrange': self.moving = true; break;
-                    case 'edit': self.editTile(); break;
-                    case 'delete': self.deleteTile(); break;
-                }
-            }).finally(function() {
-                self.editing = false;
-                self.setupBindings();
-            });
+            HotkeyDialog()
+                .actions([{
+                    caption: 'Arrange',
+                    icon: 'compare_arrows'
+                }, {
+                    caption: 'Edit',
+                    icon: 'edit'
+                }, {
+                    caption: 'Cancel',
+                    icon: 'cancel'
+                }, {
+                    caption: 'Delete',
+                    icon: 'delete'
+                }])
+                .wait(self.actionHold.promise)
+                .show()
+                .then(function(result) {
+                    switch(result.caption) {
+                        case 'Arrange':
+                            self.moving = true;
+                            self.editing = false;
+                            self.setupBindings();
+                            break;
+                        case 'Edit':
+                            self.editing = false;
+                            self.editTile();
+                            break;
+                        case 'Delete':
+                            self.deleteTile();
+                            break;
+                        default:
+                            self.setupBindings();
+                    }
+                });
         };
     });

@@ -12,6 +12,7 @@ angular.module('farnsworth')
         var mainApp = require('electron').remote.app;
         var fs = require('fs');
         var path = mainApp.getPath('userData') + '/settings.json';
+        var backupPath = mainApp.getPath('userData') + '/settings-backup.json';
 
         var service = {
             settings: null
@@ -39,6 +40,8 @@ angular.module('farnsworth')
                     }
 
                     deferred.resolve(service.settings);
+
+                    service.save(true);
                 });
             } else {
                 deferred.resolve(service.settings);
@@ -52,13 +55,13 @@ angular.module('farnsworth')
          */
         service.clean = function() {
             if(_.has(service.settings, 'categories')) {
-                service.settings.categories = _.remove(service.settings.categories, function(category) {
-                    return !category.tiles || category.tiles.length === 0 || category.transient;
+                service.settings.categories = _.filter(service.settings.categories, function(category) {
+                    return category.tiles && category.tiles.length > 0 && !category.transient;
                 });
 
                 _.each(service.settings.categories, function(category) {
-                    category.tiles = _.remove(category.tiles, function(tile) {
-                        return tile.transient;
+                    category.tiles = _.filter(category.tiles, function(tile) {
+                        return !tile.transient;
                     })
                 });
             }
@@ -67,9 +70,10 @@ angular.module('farnsworth')
         /**
          * Save the current settings.
          *
+         * @param {Boolean} backup Whether to use the backup path or not.
          * @return {Promise -> object} Promise which, when resolve, will yield the saved settings.
          */
-        service.save = function() {
+        service.save = function(backup) {
             var deferred = $q.defer();
 
             if(!service.settings) {
@@ -78,7 +82,7 @@ angular.module('farnsworth')
 
             service.clean();
 
-            fs.writeFile(path, JSON.stringify(service.settings, null, 4), function(error) {
+            fs.writeFile(backup ? backupPath : path, JSON.stringify(service.settings, null, 4), function(error) {
                 if(error) {
                     deferred.reject();
                 } else {
