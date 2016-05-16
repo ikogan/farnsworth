@@ -7,7 +7,7 @@
  */
 angular.module('farnsworth')
     .controller('HomeController', function($location, $mdToast, $mdDialog, $timeout, $q,
-            $scope, hotkeys, SettingsService, HotkeyDialog) {
+            $scope, $route, hotkeys, SettingsService, HotkeyDialog) {
         var slash = require('slash');               // Convert Windows paths to something we can use in `file:///` urls.
         var app = require('electron').remote.app;   // Needed to close the application.
 
@@ -30,7 +30,8 @@ angular.module('farnsworth')
         self.selectedCategory = null;           // The currently selected category.
         self.selectedCategoryIndex = 0;         // The index of the currently selected category, used when navigating and moving tiles.
         self.selectedTile = null;               // A reference to the currently selected tile.
-        self.selectedTileIndex = 0;             // THe index of the currently selected tile.
+        self.selectedTileIndex = 0;             // The index of the currently selected tile.
+        self.editingCategories = false;         // Whether or not we're editing the list of categories.
 
         SettingsService.get().then(function(settings) {
             if(_.has(settings, 'categories')) {
@@ -164,24 +165,6 @@ angular.module('farnsworth')
                 }
             });
 
-            // Helper function to select the proper tile in the newly activated
-            // category.
-            var selectProperCategoryTile = function() {
-                if(self.selectedTileIndex >= self.selectedCategory.tiles.length) {
-                    // When moving, self.selectedTile doesn't change, so this is safe.
-                    if(self.moving) {
-                        self.selectedCategory.tiles.push(self.selectedTile);
-                        self.selectedTileIndex = self.selectedCategory.tiles.length;
-                    } else {
-                        self.selectedTileIndex = self.selectedCategory.tiles.length - 1;
-                    }
-                } else if(self.moving) {
-                    self.selectedCategory.tiles.splice(self.selectedTileIndex, 0, self.selectedTile);
-                }
-
-                self.selectedTile = self.selectedCategory.tiles[self.selectedTileIndex];
-            };
-
             // Move down to the next category.
             hotkeys.bindTo($scope).add({
                 combo: 'down',
@@ -198,7 +181,7 @@ angular.module('farnsworth')
 
                         self.selectedCategory = self.categoryList[++self.selectedCategoryIndex];
 
-                        selectProperCategoryTile();
+                        self.selectProperCategoryTile();
                     }
                 }
             });
@@ -219,7 +202,7 @@ angular.module('farnsworth')
 
                         self.selectedCategory = self.categoryList[--self.selectedCategoryIndex];
 
-                        selectProperCategoryTile();
+                        self.selectProperCategoryTile();
                     }
                 }
             });
@@ -306,20 +289,34 @@ angular.module('farnsworth')
         }
 
         /**
+         * Select the proper tile in the current category.
+         */
+        self.selectProperCategoryTile = function() {
+            if(self.selectedTileIndex >= self.selectedCategory.tiles.length) {
+                // When moving, self.selectedTile doesn't change, so this is safe.
+                if(self.moving) {
+                    self.selectedCategory.tiles.push(self.selectedTile);
+                    self.selectedTileIndex = self.selectedCategory.tiles.length;
+                } else {
+                    self.selectedTileIndex = self.selectedCategory.tiles.length - 1;
+                }
+            } else if(self.moving) {
+                self.selectedCategory.tiles.splice(self.selectedTileIndex, 0, self.selectedTile);
+            }
+
+            self.selectedTile = self.selectedCategory.tiles[self.selectedTileIndex];
+        };
+
+        /**
          * Disable all key bindings.
          */
         self.disableBindings = function() {
-            hotkeys.del('left');
-            hotkeys.del('right');
-            hotkeys.del('up');
-            hotkeys.del('down');
-
             if(self.actionHold.promise) {
                 self.actionHold.promise.finally(function() {
-                    hotkeys.del('enter');
+                    Mousetrap.reset();
                 });
             } else {
-                hotkeys.del('enter');
+                Mousetrap.reset();
             }
         };
 
@@ -348,8 +345,172 @@ angular.module('farnsworth')
          * Enter category editing mode. In this mode, we can only move up and down
          * categories, rearrange them, or rename them.
          */
-        self.editCategoires = function() {
+        self.editCategories = function(selectIndex) {
+            self.disableBindings();
 
+            // There are two ways we could be called, the first is if we're called
+            // after deleting a category, in which case we were passed the index
+            // of the category to select.
+            if(!_.isUndefined(selectIndex)) {
+                self.selectedCategory = self.categoryList[selectIndex];
+            } else {
+                // The second is from the edit categories button, in this case, move
+                // the user up one category.
+                self.selectedCategory = self.categoryList[--self.selectedCategoryIndex];
+            }
+
+            self.editingCategories = true;
+
+            hotkeys.bindTo($scope).add({
+                combo: 'right',
+                description: 'Select stop editing option.',
+                callback: function() {
+                    if(self.selectedCategory !== null) {
+                        self.selectedCategory = null;
+                    }
+                }
+            });
+
+            hotkeys.bindTo($scope).add({
+                combo: 'left',
+                description: 'Select category list.',
+                callback: function() {
+                    if(self.selectedCategory === null) {
+                        self.selectedCategory = self.categoryList[self.selectedCategoryIndex];
+                    }
+                }
+            });
+
+            hotkeys.bindTo($scope).add({
+                combo: 'up',
+                description: 'Select previous category.',
+                callback: function() {
+                    if(self.selectedCategoryIndex > 0) {
+                        self.selectedCategory = self.categoryList[--self.selectedCategoryIndex];
+                    }
+                }
+            });
+
+            hotkeys.bindTo($scope).add({
+                combo: 'down',
+                description: 'Select next category.',
+                callback: function() {
+                    if(self.selectedCategoryIndex < self.categoryList.length - 2) {
+                        self.selectedCategory = self.categoryList[++self.selectedCategoryIndex];
+                    }
+                }
+            });
+
+            hotkeys.bindTo($scope).add({
+                combo: 'enter',
+                description: 'Edit the selected category',
+                callback: function() {
+                    if(self.selectedCategory === null) {
+                        self.editingCategories = false;
+                        self.selectedCategoryIndex = self.categoryList.length - 1;
+                        self.selectedCategory = self.categoryList[self.selectedCategoryIndex];
+                        self.selectedTileIndex = 1;
+                        self.selectedTile = self.selectedCategory.tiles[self.selectedTileIndex];
+
+                        self.setupBindings();
+                        return;
+                    }
+
+                    self.disableBindings();
+
+                    HotkeyDialog()
+                        .actions([{
+                            caption: 'Arrange',
+                            icon: 'swap_vert'
+                        }, {
+                            caption: 'Rename',
+                            icon: 'edit'
+                        }, {
+                            caption: 'Cancel',
+                            icon: 'cancel'
+                        }, {
+                            caption: 'Delete',
+                            icon: 'delete'
+                        }])
+                        .show()
+                        .then(function(result) {
+                            switch(result.caption) {
+                                case 'Arrange':
+                                    self.moving = true;
+                                    self.editCategories();
+                                    break;
+                                case 'Rename':
+                                    self.renameCategory();
+                                    break;
+                                case 'Delete':
+                                    self.deleteCategory();
+                                    break;
+                                default:
+                                    self.editCategories(self.selectedCategoryIndex);
+                            }
+
+                            self.selectProperCategoryTile();
+                        });
+                }
+            });
+        };
+
+        self.renameCategory = function() {
+            self.disableBindings();
+
+            $mdDialog.show({
+                controllerAs: 'controller',
+                locals: {
+                    category: self.selectedCategory
+                },
+                bindToController: true,
+                templateUrl: 'views/dialogs/rename-category.html',
+                controller: function(hotkeys, $mdDialog, $scope) {
+                    hotkeys.bindTo($scope).add({
+                        combo: 'enter',
+                        description: 'Rename the category.',
+                        allowIn: ['INPUT'],
+                        callback: function() {
+                            $mdDialog.hide();
+                        }
+                    });
+                }
+            }).then(function() {
+                _.each(self.selectedCategory.tiles, function(tile) {
+                    tile.category = self.selectedCategory.name;
+                });
+
+                return SettingsService.save().then(function() {
+                    self.editCategories(self.selectedCategoryIndex);
+                });
+            }).catch(function() {
+                self.editCategories(self.selectedCategoryIndex);
+            });
+        };
+
+        self.deleteCategory = function() {
+            self.disableBindings();
+
+            HotkeyDialog()
+                .prompt('Are you sure you want to delete this category?')
+                .show()
+                .then(function(result) {
+                    if(result.caption === 'Yes') {
+                        delete self.categories[self.selectedCategory.name];
+                        self.categoryList.splice(self.selectedCategoryIndex, 1);
+
+                        SettingsService.save().then(function() {
+                            if(self.categoryList.length === 1) {
+                                $route.reload();
+                            } else {
+                                return self.editCategories((self.selectedCategoryIndex < self.categoryList.length - 1)
+                                    ? self.selectedCategoryIndex : self.selectedCategoryIndex - 1);
+                            }
+                        });
+                    } else {
+                        self.editCategories(self.selectedCategoryIndex);
+                    }
+                });
         };
 
         /**
@@ -375,7 +536,7 @@ angular.module('farnsworth')
                 style['background-image'] = 'url(file:///' + slash(tile.image) + ')';
             }
 
-            if(self.moving && self.selectedTile !== tile) {
+            if(self.editingCategories || (self.moving && self.selectedTile !== tile)) {
                 style['-webkit-filter'] = 'blur(1px) grayscale(0.4)';
             }
 
@@ -452,7 +613,7 @@ angular.module('farnsworth')
             HotkeyDialog()
                 .actions([{
                     caption: 'Arrange',
-                    icon: 'compare_arrows'
+                    icon: 'swap_horiz'
                 }, {
                     caption: 'Edit',
                     icon: 'edit'
@@ -469,11 +630,9 @@ angular.module('farnsworth')
                     switch(result.caption) {
                         case 'Arrange':
                             self.moving = true;
-                            self.editing = false;
                             self.setupBindings();
                             break;
                         case 'Edit':
-                            self.editing = false;
                             self.editTile();
                             break;
                         case 'Delete':

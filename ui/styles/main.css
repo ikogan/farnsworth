@@ -43,6 +43,14 @@ md-input-container + .md-button {
     color: white;
 }
 
+.category-header .category-selected {
+    font-size: 2em;
+}
+
+.category-header .category-disabled {
+    -webkit-filter: blur(1px) grayscale(0.4);
+}
+
 .category-tiles md-card {
     -webkit-filter: drop-shadow(1px 1px 20px black);
     width: 220px;
@@ -85,4 +93,10 @@ md-input-container + .md-button {
 
 .category-tiles .tile-selected .tile-image {
     padding: 40px;
+}
+
+#cancel-category-editing-button {
+    position: fixed;
+    bottom: 5em;
+    right: 3em;
 }

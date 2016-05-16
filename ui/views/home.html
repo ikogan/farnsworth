@@ -15,7 +15,7 @@
 
 <div ng-if='!controller.loading' layout="column" class='category' ng-repeat="category in controller.categoryList track by $index">
     <div class='category-header'>
-        <h2>{{ category.name }}</h2>
+        <h2 ng-class='{"category-selected": controller.editingCategories && controller.selectedCategory === category, "category-disabled": controller.editingCategories && controller.selectedCategory !== category}'>{{ category.name }}</h2>
     </div>
     <div class='category-tiles' layout="row">
         <md-card ng-repeat="tile in category.tiles" ng-style='controller.getTileStyle(tile);'
@@ -28,3 +28,9 @@
         </md-card>
     </div>
 </div>
+
+<md-button id='cancel-category-editing-button' class='md-raised'
+    ng-class='{"md-primary": controller.selectedCategory === null}' ng-if='controller.editingCategories'>
+    Cancel Editing
+    <md-icon>cancel</md-icon>
+</md-button>
