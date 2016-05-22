@@ -17,9 +17,9 @@
                 <div>{{ controller.currentDate|date:controller.dateFormat }}</div>
             </div>
         </md-toolbar>
-        <md-container>
+        <md-container id='container:content'>
             <ng-view />
-        </md-container>
+        </md>
     </body>
 
     <script src='../node_modules/lodash/lodash.js'></script>
@@ -32,6 +32,7 @@
     <script src='../node_modules/angular-sanitize/angular-sanitize.js'></script>
     <script src='../node_modules/angular-messages/angular-messages.js'></script>
     <script src='../node_modules/angular-hotkeys/src/hotkeys.js'></script>
+    <script src='../node_modules/angular-scroll/angular-scroll.js'></script>
     <script>
         // Hack to fix TinyColor misdetecting Node because we're running in
         // Electron part 1.

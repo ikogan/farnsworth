@@ -94,7 +94,7 @@ angular.module('farnsworth')
          */
         self.addCategory = function() {
             $mdDialog.show({
-                    controller: function($scope) {
+                    controller: function($scope, hotkeys) {
                         $scope.cancel = function() {
                             return $mdDialog.cancel();
                         };
@@ -102,6 +102,13 @@ angular.module('farnsworth')
                         $scope.save = function() {
                             return $mdDialog.hide($scope.category);
                         }
+
+                        hotkeys.bindTo($scope).add({
+                            combo: 'enter',
+                            description: 'Add category.',
+                            allowIn: ['INPUT'],
+                            callback: $scope.save
+                        });
                     },
                     templateUrl: './views/dialogs/add-category.html',
                     parent: angular.element(document.body),
@@ -118,9 +125,11 @@ angular.module('farnsworth')
                     if(_.size(self.categories) == 1) {
                         self.categories[category].order = 1;
                     } else {
-                        self.categories[category].order = _.reduce(self.categories, function(max, category) {
+                        self.categories[category].order = _.reduce(_.filter(self.categories, function(category) {
+                            return !category.transient;
+                        }, function(max, category) {
                             return (category.order && category.order > max) ? category.order : (max || 0);
-                        }) + 1;
+                        })) + 1;
                     }
 
                     self.tile.category = category;

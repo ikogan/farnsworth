@@ -98,28 +98,28 @@ angular.module('farnsworth')
                                 $mdDialog.hide(self.dialogActions[self.action]);
                             }
                         });
-                    });
 
-                    // Add left, right, and enter keybindings so we can do this
-                    // with a keyboard/controller.
-                    hotkeys.bindTo($scope).add({
-                        combo: 'right',
-                        description: 'Select the option right of the current option',
-                        callback: function() {
-                            if(self.action < self.dialogActions.length-1) {
-                                self.action++;
+                        // Add left, right, and enter keybindings so we can do this
+                        // with a keyboard/controller.
+                        hotkeys.bindTo($scope).add({
+                            combo: 'right',
+                            description: 'Select the option right of the current option',
+                            callback: function() {
+                                if(self.action < self.dialogActions.length-1) {
+                                    self.action++;
+                                }
                             }
-                        }
-                    });
+                        });
 
-                    hotkeys.bindTo($scope).add({
-                        combo: 'left',
-                        description: 'Select the option left of the curren options.',
-                        callback: function() {
-                            if(self.action > 0) {
-                                self.action--;
+                        hotkeys.bindTo($scope).add({
+                            combo: 'left',
+                            description: 'Select the option left of the curren options.',
+                            callback: function() {
+                                if(self.action > 0) {
+                                    self.action--;
+                                }
                             }
-                        }
+                        });
                     });
                 }
             }

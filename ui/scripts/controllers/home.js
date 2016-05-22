@@ -7,7 +7,8 @@
  */
 angular.module('farnsworth')
     .controller('HomeController', function($location, $mdToast, $mdDialog, $timeout, $q,
-            $scope, $route, hotkeys, SettingsService, HotkeyDialog) {
+            $scope, $route, $document, hotkeys, duScrollDuration, duScrollEasing,
+            SettingsService, HotkeyDialog) {
         var slash = require('slash');               // Convert Windows paths to something we can use in `file:///` urls.
         var app = require('electron').remote.app;   // Needed to close the application.
 
@@ -34,10 +35,11 @@ angular.module('farnsworth')
         self.editingCategories = false;         // Whether or not we're editing the list of categories.
 
         SettingsService.get().then(function(settings) {
-            if(_.has(settings, 'categories')) {
+            if(_.has(settings, 'categories') && _.size(settings.categories) > 0) {
                 self.categories = settings.categories;
 
                 self.init();
+                self.setupBindings();
             } else {
                 self.initEmpty();
             }
@@ -72,22 +74,13 @@ angular.module('farnsworth')
          * creates the hardcoded System category.
          */
         self.init = function() {
-            // Make sure we ignore transient categories when building the list
-            // as we're going to add them later.
-            self.categoryList = _.sortBy(_.filter(self.categories, function(category) {
-                return !category.transient;
-            }), 'order');
-            self.selectedCategory = self.categoryList[self.selectedCategoryIndex];
-
-            if(self.selectedCategory.tiles.length > self.selectedTileIndex) {
-                self.selectedTile = self.selectedCategory.tiles[self.selectedTileIndex];
-            }
-
             // Hardcoded System tiles for editing categories, adding new
             // tiles, exiting, etc.
             self.categories['System'] = {
                 'name': 'System',
-                'order': self.categoryList.length,
+                'order': _.reduce(self.categories, function(max, category) {
+                    return (category.order && category.order > max) ? category.order : (max || 0);
+                }) + 1,
                 'transient': true,
                 'tiles': [{
                     'name': 'Add Tile',
@@ -120,9 +113,28 @@ angular.module('farnsworth')
                 }]
             };
 
-            self.categoryList.push(self.categories['System']);
+            // Make sure we ignore transient categories when building the list
+            // as we're going to add them later.
+            self.categoryList = self.makeCategoryList();
+            self.selectedCategory = self.categoryList[self.selectedCategoryIndex];
 
-            self.setupBindings();
+            if(self.selectedCategory.tiles.length > self.selectedTileIndex) {
+                self.selectedTile = self.selectedCategory.tiles[self.selectedTileIndex];
+            }
+        };
+
+        /**
+         * Build and return a list of all categories. Sort all categories
+         * that are not transient first, followed by any that are.
+         *
+         * @return {[object]} List of all categories, sorted by order.
+         */
+        self.makeCategoryList = function() {
+            var partition = _.partition(self.categories, function(category) {
+                return !category.transient;
+            })
+
+            return _.concat(_.sortBy(partition[0], 'order'), partition[1]);
         };
 
         /**
@@ -144,6 +156,8 @@ angular.module('farnsworth')
                         }
 
                         self.selectedTile = self.selectedCategory.tiles[++self.selectedTileIndex];
+
+                        self.scrollTileIntoView(self.selectedTile);
                     }
                 }
             });
@@ -161,6 +175,8 @@ angular.module('farnsworth')
                         }
 
                         self.selectedTile = self.selectedCategory.tiles[--self.selectedTileIndex];
+
+                        self.scrollTileIntoView(self.selectedTile);
                     }
                 }
             });
@@ -220,13 +236,13 @@ angular.module('farnsworth')
                 // the 'keydown' action, it's because we just released the key.
                 if(action === 'keydown') {
                     handler = function() {
+                        // First, setup the opposite hotkey.
+                        addEnterHotkey('keyup');
+
                         // The only time we ever want to do anything on keydown
                         // is if the edit dialog isn't open and we're not moving
                         // anything.
                         if(!self.moving) {
-                            // First, setup the opposite hotkey.
-                            addEnterHotkey('keyup');
-
                             // Set our hold timer, after which, we'll activate
                             // edit mode.
                             self.actionTimeout = $timeout(function() {
@@ -259,7 +275,9 @@ angular.module('farnsworth')
                             // If we're moving something, then enter drops
                             // the tile we're moving.
                             self.moving = false;
-                            SettingsService.save().catch(function(error) {
+                            SettingsService.save().then(function() {
+                                self.init();
+                            }).catch(function(error) {
                                 $mdToast.show(
                                   $mdToast.simple()
                                     .textContent(`Error saving tile: ${error}`)
@@ -289,22 +307,46 @@ angular.module('farnsworth')
         }
 
         /**
+         * Scroll the specified tile into view.
+         *
+         * TODO: Turn this into a directive since this isn't really kosher
+         * in a controller.
+         *
+         * @param  {object} tile Tile to scroll to.
+         */
+        self.scrollTileIntoView = function(tile) {
+            var tileElement = document.getElementById(self.getTileId(tile));
+            var categoryElement = document.getElementById(self.getCategoryId(self.categories[tile.category]));
+
+            if(tileElement.offsetLeft + tileElement.offsetWidth > categoryElement.clientWidth + categoryElement.scrollLeft) {
+                angular.element(categoryElement)
+                    .scrollLeftAnimated(tileElement.offsetLeft + tileElement.offsetWidth - categoryElement.clientWidth,
+                        duScrollDuration, duScrollEasing);
+            } else if(tileElement.offsetLeft < categoryElement.scrollLeft) {
+                angular.element(categoryElement)
+                    .scrollLeftAnimated(tileElement.offsetLeft - 20, duScrollDuration, duScrollEasing);
+            }
+        };
+
+        /**
          * Select the proper tile in the current category.
          */
         self.selectProperCategoryTile = function() {
             if(self.selectedTileIndex >= self.selectedCategory.tiles.length) {
                 // When moving, self.selectedTile doesn't change, so this is safe.
-                if(self.moving) {
+                // Though we shouldn't do this when editing categories.
+                if(self.moving && !self.editingCategories) {
                     self.selectedCategory.tiles.push(self.selectedTile);
-                    self.selectedTileIndex = self.selectedCategory.tiles.length;
-                } else {
-                    self.selectedTileIndex = self.selectedCategory.tiles.length - 1;
                 }
-            } else if(self.moving) {
+
+                self.selectedTileIndex = self.selectedCategory.tiles.length - 1;
+            } else if(self.moving && !self.editingCategories) {
                 self.selectedCategory.tiles.splice(self.selectedTileIndex, 0, self.selectedTile);
             }
 
             self.selectedTile = self.selectedCategory.tiles[self.selectedTileIndex];
+
+            self.scrollTileIntoView(self.selectedTile);
         };
 
         /**
@@ -365,7 +407,7 @@ angular.module('farnsworth')
                 combo: 'right',
                 description: 'Select stop editing option.',
                 callback: function() {
-                    if(self.selectedCategory !== null) {
+                    if(!self.moving && self.selectedCategory !== null) {
                         self.selectedCategory = null;
                     }
                 }
@@ -375,7 +417,7 @@ angular.module('farnsworth')
                 combo: 'left',
                 description: 'Select category list.',
                 callback: function() {
-                    if(self.selectedCategory === null) {
+                    if(!self.moving && self.selectedCategory === null) {
                         self.selectedCategory = self.categoryList[self.selectedCategoryIndex];
                     }
                 }
@@ -386,7 +428,16 @@ angular.module('farnsworth')
                 description: 'Select previous category.',
                 callback: function() {
                     if(self.selectedCategoryIndex > 0) {
-                        self.selectedCategory = self.categoryList[--self.selectedCategoryIndex];
+                        if(self.moving) {
+                            var temp = self.selectedCategory.order;
+                            var newCategory = self.categoryList[--self.selectedCategoryIndex];
+                            self.selectedCategory.order = newCategory.order;
+                            newCategory.order = temp;
+
+                            self.categoryList = self.makeCategoryList();
+                        } else {
+                            self.selectedCategory = self.categoryList[--self.selectedCategoryIndex];
+                        }
                     }
                 }
             });
@@ -396,7 +447,16 @@ angular.module('farnsworth')
                 description: 'Select next category.',
                 callback: function() {
                     if(self.selectedCategoryIndex < self.categoryList.length - 2) {
-                        self.selectedCategory = self.categoryList[++self.selectedCategoryIndex];
+                        if(self.moving) {
+                            var temp = self.selectedCategory.order;
+                            var newCategory = self.categoryList[++self.selectedCategoryIndex];
+                            self.selectedCategory.order = newCategory.order;
+                            newCategory.order = temp;
+
+                            self.categoryList = self.makeCategoryList();
+                        } else {
+                            self.selectedCategory = self.categoryList[++self.selectedCategoryIndex];
+                        }
                     }
                 }
             });
@@ -414,43 +474,53 @@ angular.module('farnsworth')
 
                         self.setupBindings();
                         return;
-                    }
-
-                    self.disableBindings();
-
-                    HotkeyDialog()
-                        .actions([{
-                            caption: 'Arrange',
-                            icon: 'swap_vert'
-                        }, {
-                            caption: 'Rename',
-                            icon: 'edit'
-                        }, {
-                            caption: 'Cancel',
-                            icon: 'cancel'
-                        }, {
-                            caption: 'Delete',
-                            icon: 'delete'
-                        }])
-                        .show()
-                        .then(function(result) {
-                            switch(result.caption) {
-                                case 'Arrange':
-                                    self.moving = true;
-                                    self.editCategories();
-                                    break;
-                                case 'Rename':
-                                    self.renameCategory();
-                                    break;
-                                case 'Delete':
-                                    self.deleteCategory();
-                                    break;
-                                default:
-                                    self.editCategories(self.selectedCategoryIndex);
-                            }
-
-                            self.selectProperCategoryTile();
+                    } else if(self.moving) {
+                        SettingsService.save().catch(function() {
+                            $mdToast.show(
+                              $mdToast.simple()
+                                .textContent('Error saving.')
+                                    .hideDelay(3000));
+                        }).finally(function() {
+                            self.init();
+                            self.moving = false;
                         });
+                    } else {
+                        self.disableBindings();
+
+                        HotkeyDialog()
+                            .actions([{
+                                caption: 'Arrange',
+                                icon: 'swap_vert'
+                            }, {
+                                caption: 'Rename',
+                                icon: 'edit'
+                            }, {
+                                caption: 'Cancel',
+                                icon: 'cancel'
+                            }, {
+                                caption: 'Delete',
+                                icon: 'delete'
+                            }])
+                            .show()
+                            .then(function(result) {
+                                switch(result.caption) {
+                                    case 'Arrange':
+                                        self.moving = true;
+                                        self.editCategories(self.selectedCategoryIndex);
+                                        break;
+                                    case 'Rename':
+                                        self.renameCategory();
+                                        break;
+                                    case 'Delete':
+                                        self.deleteCategory();
+                                        break;
+                                    default:
+                                        self.editCategories(self.selectedCategoryIndex);
+                                }
+
+                                self.selectProperCategoryTile();
+                            });
+                    }
                 }
             });
         };
@@ -497,13 +567,13 @@ angular.module('farnsworth')
                 .then(function(result) {
                     if(result.caption === 'Yes') {
                         delete self.categories[self.selectedCategory.name];
-                        self.categoryList.splice(self.selectedCategoryIndex, 1);
 
                         SettingsService.save().then(function() {
                             if(self.categoryList.length === 1) {
                                 $route.reload();
                             } else {
-                                return self.editCategories((self.selectedCategoryIndex < self.categoryList.length - 1)
+                                self.categoryList = self.makeCategoryList();
+                                self.editCategories((self.selectedCategoryIndex < self.categoryList.length - 1)
                                     ? self.selectedCategoryIndex : self.selectedCategoryIndex - 1);
                             }
                         });
@@ -541,6 +611,34 @@ angular.module('farnsworth')
             }
 
             return style;
+        };
+
+        /**
+         * Get the id of a given tile. The ID is the tile's category
+         * name and index in the tile list of that category separated
+         * by a dot and preceded by 'tile:'. For example:
+         *
+         * 'tile:Video:5'
+         *
+         * @param  {object} tile The tile for which to get the ID.
+         * @return {string}      The tile's ID.
+         */
+        self.getTileId = function(tile) {
+            var tileId = _.findIndex(self.categories[tile.category].tiles, function(candidate) {
+                return candidate === tile
+            });
+            return `tile:${tile.category}.${tileId}`;
+        };
+
+        /**
+         * Get the id of a given category. The ID is simply
+         * 'category:' followed by the category name.
+         *
+         * @param  {object} category The category of which to get the ID.
+         * @return {string}          The category ID.
+         */
+        self.getCategoryId = function(category) {
+            return `category:${category.name}`;
         };
 
         /**

@@ -5,12 +5,12 @@
         <form name='tileForm'>
             <md-input-container class='md-block'>
                 <label>Name</label>
-                <input ng-model='controller.tile.name' type='text' />
+                <input ng-model='controller.tile.name' type='text' ng-required='!controller.tile.image' />
             </md-input-container>
             <md-input-container class='md-inline-form md-block'>
                 <md-icon md-ink-ripple aria-label="Add Category" class='clickable'
                     ng-click='controller.addCategory();'>add_circle</md-icon>
-                <md-select placeholder="Category" ng-model="controller.tile.category">
+                <md-select placeholder="Category" ng-model="controller.tile.category" required>
                     <md-option ng-value='category.name' ng-repeat='category in controller.categories | filterTransient'>
                         {{ category.name }}
                     </md-option>
@@ -28,7 +28,7 @@
                 <md-input-container flex class='md-block'>
                     <label>Command</label>
                     <md-icon>code</md-icon>
-                    <input flex ng-model='controller.tile.command' type='text' />
+                    <input flex ng-model='controller.tile.command' type='text' required />
                 </md-input-container>
                 <md-button class='md-raised' ng-click='controller.browseFile("command", controller.tile.command)'>Browse</md-button>
             </div>
@@ -36,14 +36,14 @@
                 <md-input-container flex class='md-block'>
                     <label>Image Path</label>
                     <md-icon>image</md-icon>
-                    <input flex ng-model='controller.tile.image' type='text' />
+                    <input flex ng-model='controller.tile.image' type='text' ng-required='!controller.tile.name' />
                 </md-input-container>
                 <md-button class='md-raised' ng-click='controller.browseFile("image", controller.tile.image)'>Browse</md-button>
             </div>
         </form>
     </md-card-content>
     <md-card-actions>
-        <md-button ng-click='controller.save(controller.tile);'>Save</md-button>
+        <md-button ng-click='controller.save(controller.tile);' ng-disabled='tileForm.$invalid'>Save</md-button>
         <md-button ng-click='controller.cancel();'>Cancel</md-button>
     </md-card-actions>
 </md-card>

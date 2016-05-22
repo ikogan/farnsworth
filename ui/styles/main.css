@@ -9,6 +9,15 @@ body {
     font-family: Roboto-Regular, Helvetica, Arial, sans-serif;
     background-color: black;
     min-height: 100%;
+
+    /* Disable scrolling the body as we want to scroll categories. */
+    overflow-y: hidden;
+}
+
+/* Globally disable showing the scrollbar as we'll be using the keyboard
+ * or controller to scroll. */
+::-webkit-scrollbar {
+    display: none;
 }
 
 .clickable {
@@ -51,9 +60,15 @@ md-input-container + .md-button {
     -webkit-filter: blur(1px) grayscale(0.4);
 }
 
+.category-tiles {
+    overflow-x: scroll;
+    overflow-y: hidden;
+}
+
 .category-tiles md-card {
     -webkit-filter: drop-shadow(1px 1px 20px black);
     width: 220px;
+    min-width: 220px;
     height: 110px;
     line-height: 110px;
     text-align: center;
@@ -80,6 +95,7 @@ md-input-container + .md-button {
 
 .category-tiles .tile-selected {
     width: 250px;
+    min-width: 250px;
     height: 130px;
     margin-top: -1px;
     margin-left: -1px;

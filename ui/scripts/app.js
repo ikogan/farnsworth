@@ -9,7 +9,8 @@ angular
         'ngRoute',
         'ngSanitize',
         'cfp.hotkeys',
-        'mdColorPicker'
+        'mdColorPicker',
+        'duScroll'
     ])
     .config(function ($routeProvider) {
             $routeProvider

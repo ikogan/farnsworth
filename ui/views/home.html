@@ -14,14 +14,15 @@
 </md-card>
 
 <div ng-if='!controller.loading' layout="column" class='category' ng-repeat="category in controller.categoryList track by $index">
-    <div class='category-header'>
+    <div class='category-header' ng-attr-id='{{ controller.getCategoryId(category) }}:header'>
         <h2 ng-class='{"category-selected": controller.editingCategories && controller.selectedCategory === category, "category-disabled": controller.editingCategories && controller.selectedCategory !== category}'>{{ category.name }}</h2>
     </div>
-    <div class='category-tiles' layout="row">
-        <md-card ng-repeat="tile in category.tiles" ng-style='controller.getTileStyle(tile);'
+    <div class='category-tiles' layout="row" ng-attr-id='{{ controller.getCategoryId(category) }}'>
+        <md-card ng-repeat="tile in category.tiles track by $index" ng-style='controller.getTileStyle(tile);'
             ng-class='{"tile-selected": controller.selectedTile === tile}'
             ng-mousedown='controller.hold($event, tile);' ng-mouseup='controller.release($event);'
-            ng-keydown='controller.hold($event, tile);' ng-keyup='controller.release($event);'>
+            ng-keydown='controller.hold($event, tile);' ng-keyup='controller.release($event);'
+            ng-attr-id='{{ controller.getTileId(tile) }}'>
             <div ng-class='{"tile-image": tile.image, "tile-text": !tile.image}'>
                 <span>{{ tile.name }}</span>
             </div>
@@ -30,7 +31,7 @@
 </div>
 
 <md-button id='cancel-category-editing-button' class='md-raised'
-    ng-class='{"md-primary": controller.selectedCategory === null}' ng-if='controller.editingCategories'>
+    ng-class='{"md-primary": controller.selectedCategory === null}' ng-if='!controller.moving && controller.editingCategories'>
     Cancel Editing
     <md-icon>cancel</md-icon>
 </md-button>

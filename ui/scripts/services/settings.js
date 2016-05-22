@@ -8,7 +8,7 @@
  * optimization.
  */
 angular.module('farnsworth')
-    .service('SettingsService', function($q) {
+    .service('SettingsService', function($q, $mdToast) {
         var mainApp = require('electron').remote.app;
         var fs = require('fs');
         var path = mainApp.getPath('userData') + '/settings.json';
@@ -29,25 +29,65 @@ angular.module('farnsworth')
          * @return {Promise -> object}       Promise, which, when resolved will yield the settings.
          */
         service.get = function(reload) {
-            var deferred = $q.defer();
+            var defered = $q.defer();
 
             if(!service.settings || reload) {
                 fs.readFile(path, function(error, data) {
+                    var useBackup = false;
+
                     if(error) {
                         service.settings = {};
+                        defered.resolve(service.settings);
                     } else {
-                        service.settings = JSON.parse(data);
+                        try {
+                            service.settings = JSON.parse(data);
+
+                            if(!_.isPlainObject(service.settings) || !_.isPlainObject(service.settings.categories)) {
+                                useBackup = 'Saved settings are not valid.';
+                            } else {
+                                service.save(true);
+
+                                defered.resolve(service.settings);
+                            }
+                        } catch(e) {
+                            useBackup = `Error loading settings, attempting to load backup: ${e}`;
+                        }
+
+                        if(useBackup !== false) {
+                            $mdToast.show(
+                              $mdToast.simple()
+                                .textContent(useBackup)
+                                    .hideDelay(3000));
+
+                            fs.readFile(backupPath, function(error, data) {
+                                if(error) {
+                                    service.settings = {};
+                                } else {
+                                    try {
+                                        service.settings = JSON.parse(data);
+
+                                        if(!_.isPlainObject(service.settings)) {
+                                            service.settings = {};
+                                        }
+
+                                        if(!_.isPlainObject(service.settings.categories)) {
+                                            service.settings.categories = {};
+                                        }
+                                    } catch(e) {
+                                        service.settings = {};
+                                    }
+                                }
+
+                                deferered.resolve(service.settings);
+                            });
+                        }
                     }
-
-                    deferred.resolve(service.settings);
-
-                    service.save(true);
                 });
             } else {
-                deferred.resolve(service.settings);
+                defered.resolve(service.settings);
             }
 
-            return deferred.promise;
+            return defered.promise;
         };
 
         /**
@@ -55,7 +95,7 @@ angular.module('farnsworth')
          */
         service.clean = function() {
             if(_.has(service.settings, 'categories')) {
-                service.settings.categories = _.filter(service.settings.categories, function(category) {
+                service.settings.categories = _.omit(service.settings.categories, function(category) {
                     return category.tiles && category.tiles.length > 0 && !category.transient;
                 });
 
@@ -74,7 +114,7 @@ angular.module('farnsworth')
          * @return {Promise -> object} Promise which, when resolve, will yield the saved settings.
          */
         service.save = function(backup) {
-            var deferred = $q.defer();
+            var defered = $q.defer();
 
             if(!service.settings) {
                 service.settings = {};
@@ -84,13 +124,13 @@ angular.module('farnsworth')
 
             fs.writeFile(backup ? backupPath : path, JSON.stringify(service.settings, null, 4), function(error) {
                 if(error) {
-                    deferred.reject();
+                    defered.reject();
                 } else {
-                    deferred.resolve(service.settings);
+                    defered.resolve(service.settings);
                 }
             });
 
-            return deferred.promise;
+            return defered.promise;
         };
 
         /**

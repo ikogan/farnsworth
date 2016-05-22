@@ -5,10 +5,17 @@ const electron = require('electron');
 const app = electron.app;
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow;
+// URL where our backgrounds are
+const BACKGROUND_URL = 'https://raw.githubusercontent.com/dconnolly/chromecast-backgrounds/master/backgrounds.json';
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
+
+function init() {
+    createWindow();
+    downloadBackgrounds();
+}
 
 function createWindow () {
     // Create the browser window.
@@ -43,9 +50,13 @@ function createWindow () {
     })
 }
 
+function downloadBackgrounds() {
+
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
-app.on('ready', createWindow);
+app.on('ready', init);
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
