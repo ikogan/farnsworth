@@ -3,7 +3,7 @@
 /**
  * Controller for editing a tile or creating a new tile.
  *
- * TODO: Add form validation and keyboard navigation.
+ * TODO: Add keyboard navigation.
  */
 angular.module('farnsworth')
     .controller('EditTileController', function($mdDialog, $mdToast, $window, $scope,

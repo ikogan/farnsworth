@@ -13,8 +13,12 @@
     </md-card-actions>
 </md-card>
 
+<div ng-if='controller.settings.hideCategoryNames && !controller.editingCategories'>
+    &nbsp;
+</div>
+
 <div ng-if='!controller.loading' layout="column" class='category' ng-repeat="category in controller.categoryList track by $index">
-    <div class='category-header' ng-attr-id='{{ controller.getCategoryId(category) }}:header'>
+    <div class='category-header' ng-attr-id='{{ controller.getCategoryId(category) }}:header' ng-if='!controller.settings.hideCategoryNames || controller.editingCategories'>
         <h2 ng-class='{"category-selected": controller.editingCategories && controller.selectedCategory === category, "category-disabled": controller.editingCategories && controller.selectedCategory !== category}'>{{ category.name }}</h2>
     </div>
     <div class='category-tiles' layout="row" ng-attr-id='{{ controller.getCategoryId(category) }}'>

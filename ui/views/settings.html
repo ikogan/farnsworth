@@ -1,0 +1,15 @@
+<md-card>
+    <form name='settingsForm'>
+        <md-card-title>Settings</md-card-title>
+        <md-card-content>
+            <div class='md-card-content' layout="row">
+                <md-switch ng-model="controller.settings.hideCategoryNames" aria-label="Hide Category Names Toggle">
+                    Hide Category Names
+                </md-switchL>
+            </div>
+        <md-card-actions>
+           <md-button ng-click='controller.save();' ng-disabled='settingsForm.$invalid'>Save</md-button>
+           <md-button ng-click='controller.cancel();'>Cancel</md-button>
+        </md-card-actions>
+    </form>
+</md-card>

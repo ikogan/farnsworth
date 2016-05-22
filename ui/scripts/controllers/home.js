@@ -35,6 +35,8 @@ angular.module('farnsworth')
         self.editingCategories = false;         // Whether or not we're editing the list of categories.
 
         SettingsService.get().then(function(settings) {
+            self.settings = settings;
+
             if(_.has(settings, 'categories') && _.size(settings.categories) > 0) {
                 self.categories = settings.categories;
 

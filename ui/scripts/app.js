@@ -32,6 +32,12 @@ angular
                     controller: 'EditTileController',
                     controllerAs: 'controller'
                 })
+                .when('/settings', {
+                    title: 'Settings',
+                    templateUrl: 'views/settings.html',
+                    controller: 'SettingsController',
+                    controllerAs: 'controller'
+                })
                 .otherwise({
                     redirectTo: '/'
                 });
