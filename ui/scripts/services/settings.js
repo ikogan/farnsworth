@@ -78,7 +78,7 @@ angular.module('farnsworth')
                                     }
                                 }
 
-                                deferered.resolve(service.settings);
+                                defered.resolve(service.settings);
                             });
                         }
                     }
@@ -95,8 +95,8 @@ angular.module('farnsworth')
          */
         service.clean = function() {
             if(_.has(service.settings, 'categories')) {
-                service.settings.categories = _.omit(service.settings.categories, function(category) {
-                    return category.tiles && category.tiles.length > 0 && !category.transient;
+                service.settings.categories = _.omitBy(service.settings.categories, function(category) {
+                    return !category.tiles || category.tiles.length === 0 || category.transient;
                 });
 
                 _.each(service.settings.categories, function(category) {

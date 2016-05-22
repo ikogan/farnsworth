@@ -275,6 +275,7 @@ angular.module('farnsworth')
                             // If we're moving something, then enter drops
                             // the tile we're moving.
                             self.moving = false;
+                            self.selectedTile.category = self.selectedCategory.name;
                             SettingsService.save().then(function() {
                                 self.init();
                             }).catch(function(error) {
@@ -525,6 +526,9 @@ angular.module('farnsworth')
             });
         };
 
+        /**
+         * Rename the currently selected category.
+         */
         self.renameCategory = function() {
             self.disableBindings();
 
@@ -551,6 +555,7 @@ angular.module('farnsworth')
                 });
 
                 return SettingsService.save().then(function() {
+                    self.init();
                     self.editCategories(self.selectedCategoryIndex);
                 });
             }).catch(function() {
@@ -558,6 +563,9 @@ angular.module('farnsworth')
             });
         };
 
+        /**
+         * Delete the currently selected category.
+         */
         self.deleteCategory = function() {
             self.disableBindings();
 
@@ -572,7 +580,7 @@ angular.module('farnsworth')
                             if(self.categoryList.length === 1) {
                                 $route.reload();
                             } else {
-                                self.categoryList = self.makeCategoryList();
+                                self.init();
                                 self.editCategories((self.selectedCategoryIndex < self.categoryList.length - 1)
                                     ? self.selectedCategoryIndex : self.selectedCategoryIndex - 1);
                             }
@@ -624,10 +632,14 @@ angular.module('farnsworth')
          * @return {string}      The tile's ID.
          */
         self.getTileId = function(tile) {
-            var tileId = _.findIndex(self.categories[tile.category].tiles, function(candidate) {
-                return candidate === tile
-            });
-            return `tile:${tile.category}.${tileId}`;
+            if(tile && _.has(self.categories, tile.category)) {
+                var tileId = _.findIndex(self.categories[tile.category].tiles, function(candidate) {
+                    return candidate === tile
+                });
+                return `tile:${tile.category}.${tileId}`;
+            } else {
+                return undefined;
+            }
         };
 
         /**

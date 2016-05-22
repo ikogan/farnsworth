@@ -115,29 +115,38 @@ angular.module('farnsworth')
                     clickOutsideToClose: false
                 })
                 .then(function(category) {
-                    self.categories[category] = {
-                        name: category,
-                        tiles: []
-                    };
+                    if(_.has(self.categories, category)) {
+                        self.tile.category = category;
 
-                    // Compute the new category's order based on the existing
-                    // list of categories.
-                    if(_.size(self.categories) == 1) {
-                        self.categories[category].order = 1;
+                        $mdToast.show(
+                          $mdToast.simple()
+                            .textContent(`${category} already exists`)
+                                .hideDelay(3000));
                     } else {
-                        self.categories[category].order = _.reduce(_.filter(self.categories, function(category) {
-                            return !category.transient;
-                        }, function(max, category) {
-                            return (category.order && category.order > max) ? category.order : (max || 0);
-                        })) + 1;
+                        self.categories[category] = {
+                            name: category,
+                            tiles: []
+                        };
+
+                        // Compute the new category's order based on the existing
+                        // list of categories.
+                        if(_.size(self.categories) == 1) {
+                            self.categories[category].order = 1;
+                        } else {
+                            self.categories[category].order = _.reduce(_.filter(self.categories, function(category) {
+                                return !category.transient;
+                            }, function(max, category) {
+                                return (category.order && category.order > max) ? category.order : (max || 0);
+                            })) + 1;
+                        }
+
+                        self.tile.category = category;
+
+                        $mdToast.show(
+                          $mdToast.simple()
+                            .textContent(`Added category ${category}.`)
+                                .hideDelay(3000));
                     }
-
-                    self.tile.category = category;
-
-                    $mdToast.show(
-                      $mdToast.simple()
-                        .textContent(`Added category ${category}.`)
-                            .hideDelay(3000));
                 });
         };
     })
