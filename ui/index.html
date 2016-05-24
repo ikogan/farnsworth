@@ -17,7 +17,7 @@
                 <div>{{ controller.currentDate|date:controller.dateFormat }}</div>
             </div>
         </md-toolbar>
-        <md-container id='container:content'>
+        <md-container id='container:content' class='viewport'>
             <ng-view />
         </md>
     </body>
@@ -60,6 +60,7 @@
     <script src='./scripts/app.js'></script>
     <script src='./scripts/services/error.js'></script>
     <script src='./scripts/services/settings.js'></script>
+    <script src='./scripts/services/backgrounds.js'></script>
     <script src='./scripts/services/hotkey-dialog.js'></script>
     <script src='./scripts/controllers/toolbar.js'></script>
     <script src='./scripts/controllers/home.js'></script>

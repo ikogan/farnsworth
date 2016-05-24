@@ -8,7 +8,7 @@
 angular.module('farnsworth')
     .controller('HomeController', function($location, $mdToast, $mdDialog, $timeout, $q,
             $scope, $route, $document, hotkeys, duScrollDuration, duScrollEasing,
-            SettingsService, HotkeyDialog) {
+            SettingsService, BackgroundsService, HotkeyDialog) {
         var slash = require('slash');               // Convert Windows paths to something we can use in `file:///` urls.
         var app = require('electron').remote.app;   // Needed to close the application.
 
@@ -36,7 +36,7 @@ angular.module('farnsworth')
 
         SettingsService.get().then(function(settings) {
             self.settings = settings;
-
+            
             if(_.has(settings, 'categories') && _.size(settings.categories) > 0) {
                 self.categories = settings.categories;
 
@@ -55,6 +55,18 @@ angular.module('farnsworth')
 
             self.initEmpty();
             self.loading = false;
+        });
+
+        BackgroundsService.getRandomBackground().then(function(background) {
+            self.background = background;
+            self.backgroundStyle = {
+                'background-image': `url("file:///${slash(background.filename)}")`
+            };
+        }).catch(function(error) {
+            $mdToast.show(
+              $mdToast.simple()
+                .textContent(`Error loading application background images: ${error}`)
+                    .hideDelay(3000));
         });
 
         /**

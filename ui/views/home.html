@@ -1,41 +1,43 @@
-<div layout="row" layout-align="center center">
-    <md-progress-circular ng-if="controller.loading" md-mode="indeterminate"  md-diameter="200" />
-</div>
-
-<md-card ng-if='!controller.loading && controller.categoryList.length == 0'>
-    <img src='./images/zenith-television.jpg' class="md-card-image" alt="No Content Header" />
-    <md-card-content>
-        <p>Welcome to Farnsworth. To get started, add some categories
-        and tiles.</p>
-    </md-card-content>
-    <md-card-actions layout="row" layout-align="end center">
-        <md-button class='button-active' ng-click='controller.addTile();'>Add Tile</md-button>
-    </md-card-actions>
-</md-card>
-
-<div ng-if='controller.settings.hideCategoryNames && !controller.editingCategories'>
-    &nbsp;
-</div>
-
-<div ng-if='!controller.loading' layout="column" class='category' ng-repeat="category in controller.categoryList track by $index">
-    <div class='category-header' ng-attr-id='{{ controller.getCategoryId(category) }}:header' ng-if='!controller.settings.hideCategoryNames || controller.editingCategories'>
-        <h2 ng-class='{"category-selected": controller.editingCategories && controller.selectedCategory === category, "category-disabled": controller.editingCategories && controller.selectedCategory !== category}'>{{ category.name }}</h2>
+<div ng-style='controller.backgroundStyle'>
+    <div layout="row" layout-align="center center">
+        <md-progress-circular ng-if="controller.loading" md-mode="indeterminate"  md-diameter="200" />
     </div>
-    <div class='category-tiles' layout="row" ng-attr-id='{{ controller.getCategoryId(category) }}'>
-        <md-card ng-repeat="tile in category.tiles track by $index" ng-style='controller.getTileStyle(tile);'
-            ng-class='{"tile-selected": controller.selectedTile === tile}'
-            ng-mousedown='controller.hold($event, tile);' ng-mouseup='controller.release($event);'
-            ng-keydown='controller.hold($event, tile);' ng-keyup='controller.release($event);'
-            ng-attr-id='{{ controller.getTileId(tile) }}'>
-            <div ng-class='{"tile-image": tile.image, "tile-text": !tile.image}'>
-                <span>{{ tile.name }}</span>
-            </div>
-        </md-card>
-    </div>
-</div>
 
-<md-button id='cancel-category-editing-button' class='md-raised'
-    ng-class='{"md-primary": controller.selectedCategory === null}' ng-if='!controller.moving && controller.editingCategories'>
-    Cancel Editing
-    <md-icon>cancel</md-icon>
-</md-button>
+    <md-card ng-if='!controller.loading && controller.categoryList.length == 0'>
+        <img src='./images/zenith-television.jpg' class="md-card-image" alt="No Content Header" />
+        <md-card-content>
+            <p>Welcome to Farnsworth. To get started, add some categories
+            and tiles.</p>
+        </md-card-content>
+        <md-card-actions layout="row" layout-align="end center">
+            <md-button class='button-active' ng-click='controller.addTile();'>Add Tile</md-button>
+        </md-card-actions>
+    </md-card>
+
+    <div ng-if='controller.settings.hideCategoryNames && !controller.editingCategories'>
+        &nbsp;
+    </div>
+
+    <div ng-if='!controller.loading' layout="column" class='category' ng-repeat="category in controller.categoryList track by $index">
+        <div class='category-header' ng-attr-id='{{ controller.getCategoryId(category) }}:header' ng-if='!controller.settings.hideCategoryNames || controller.editingCategories'>
+            <h2 ng-class='{"category-selected": controller.editingCategories && controller.selectedCategory === category, "category-disabled": controller.editingCategories && controller.selectedCategory !== category}'>{{ category.name }}</h2>
+        </div>
+        <div class='category-tiles' layout="row" ng-attr-id='{{ controller.getCategoryId(category) }}'>
+            <md-card ng-repeat="tile in category.tiles track by $index" ng-style='controller.getTileStyle(tile);'
+                ng-class='{"tile-selected": controller.selectedTile === tile}'
+                ng-mousedown='controller.hold($event, tile);' ng-mouseup='controller.release($event);'
+                ng-keydown='controller.hold($event, tile);' ng-keyup='controller.release($event);'
+                ng-attr-id='{{ controller.getTileId(tile) }}'>
+                <div ng-class='{"tile-image": tile.image, "tile-text": !tile.image}'>
+                    <span>{{ tile.name }}</span>
+                </div>
+            </md-card>
+        </div>
+    </div>
+
+    <md-button id='cancel-category-editing-button' class='md-raised'
+        ng-class='{"md-primary": controller.selectedCategory === null}' ng-if='!controller.moving && controller.editingCategories'>
+        Cancel Editing
+        <md-icon>cancel</md-icon>
+    </md-button>
+</div>
