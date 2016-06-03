@@ -7,8 +7,8 @@
  */
 angular.module('farnsworth')
     .controller('HomeController', function($location, $mdToast, $mdDialog, $timeout, $q,
-            $scope, $route, $document, hotkeys, duScrollDuration, duScrollEasing,
-            SettingsService, BackgroundsService, HotkeyDialog) {
+            $scope, $route, $document, hotkeys, duScrollDuration,
+            duScrollEasing, SettingsService, BackgroundsService, HotkeyDialog) {
         var slash = require('slash');               // Convert Windows paths to something we can use in `file:///` urls.
         var app = require('electron').remote.app;   // Needed to close the application.
 
@@ -16,7 +16,8 @@ angular.module('farnsworth')
         var constants = {
             holdTime: 1000,                     // Time in MS we have to hold enter before we popup the edit dialog
             systemBackgroundColor: '#4B585C',   // Background color of the hardcoded "System" category tiles.
-            systemTextColor: '#FFFFFF'          // Text color of the hardcoded "System" category tiles.
+            systemTextColor: '#FFFFFF',         // Text color of the hardcoded "System" category tiles.
+            backgroundRefreshTime: 1800         // Time in seconds for background cycling.
         };
 
         self.loading = true;                    // Used to track when to show the loading spinner.
@@ -36,7 +37,9 @@ angular.module('farnsworth')
 
         SettingsService.get().then(function(settings) {
             self.settings = settings;
-            
+
+            self.setRandomBackground();
+
             if(_.has(settings, 'categories') && _.size(settings.categories) > 0) {
                 self.categories = settings.categories;
 
@@ -46,28 +49,39 @@ angular.module('farnsworth')
                 self.initEmpty();
             }
 
-            self.loading = false;
+            BackgroundsService.waitForBackground.finally(function() {
+                self.loading = false;
+            });
         }).catch(function(error) {
+            self.setRandomBackground();
+
             $mdToast.show(
               $mdToast.simple()
                 .textContent(`Error loading application settings: ${error}`)
                     .hideDelay(3000));
 
             self.initEmpty();
-            self.loading = false;
+
+            BackgroundsService.waitForBackground.finally(function() {
+                self.loading = false;
+            });
         });
 
-        BackgroundsService.getRandomBackground().then(function(background) {
-            self.background = background;
-            self.backgroundStyle = {
-                'background-image': `url("file:///${slash(background.filename)}")`
-            };
-        }).catch(function(error) {
-            $mdToast.show(
-              $mdToast.simple()
-                .textContent(`Error loading application background images: ${error}`)
-                    .hideDelay(3000));
-        });
+        self.setRandomBackground = function() {
+            BackgroundsService.getRandomBackground().then(function(background) {
+                self.background = background;
+                self.backgroundStyle = {
+                    'background-image': `url("file:///${slash(background.filename)}")`
+                };
+
+                $timeout(self.setRandomBackground, constants.backgroundRefreshTime * 1000);
+            }).catch(function(error) {
+                $mdToast.show(
+                  $mdToast.simple()
+                    .textContent(`Error loading application background images: ${error}`)
+                        .hideDelay(3000));
+            });
+        };
 
         /**
          * Initialize an empty homescreen. Really just bind the "Enter" button
