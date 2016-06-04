@@ -125,21 +125,76 @@ angular.module('farnsworth')
             }
         };
 
+        /**
+         * Set the text prompt displayed to the user.
+         *
+         * @param  {string} prompt The prompt.
+         * @return {HotkeyDialog}  This so that we can chain calls
+         */
         HotkeyDialog.prototype.prompt = function(prompt) {
             this.dialog.locals.text = prompt;
             return this;
         };
 
+        /**
+         * Set a custom template URL to use.
+         *
+         * @note Setting this would obviously make the prompt
+         * irrelevant unless you use `{{ controller.text }}` in
+         * your template.
+         *
+         * @param  {string} template The template URL.
+         * @return {HotkeyDialog}  This so that we can chain calls
+         */
         HotkeyDialog.prototype.template = function(template) {
             this.dialog.templateUrl = template;
             return this;
         };
 
+        /**
+         * List of all dialog actions to generate buttons at the bottom
+         * of the dialog. The form of `actions` should look like the following:
+         *
+         * ```js
+         * [{
+         *     caption: 'Arrange',
+         *     icon: 'swap_horiz'
+         * }, {
+         *     caption: 'Edit',
+         *     icon: 'edit'
+         * }, {
+         *     caption: 'Cancel',
+         *     icon: 'cancel'
+         * }, {
+         *     caption: 'Delete',
+         *     icon: 'delete'
+         * }]
+         * ```
+         *
+         * The icon is optional and the promise returned by `show()` will be
+         * resolved with the value of `caption` that the user selected.
+         *
+         * @param  {[object]} actions List of actions as defined above.
+         * @return {HotkeyDialog}  This so that we can chain calls
+         */
         HotkeyDialog.prototype.actions = function(actions) {
             this.dialog.locals.dialogActions = actions;
             return this;
         };
 
+        /**
+         * Optionally specify a promise on which we'll wait before
+         * enabling hotkeys. This allows us to prevent an action
+         * being chosen before a user has a chance to release a button
+         * that may have opened this dialog, or other reasons.
+         *
+         * This may be called with no argument to create and immediately
+         * resolve a promise internally. This is useful to defer creation
+         * of the dialog until the next digest cycle.
+         *
+         * @param  {Promise} promise (Optional, see above) The promise on which to wait
+         * @return {HotkeyDialog}  This so that we can chain calls
+         */
         HotkeyDialog.prototype.wait = function(promise) {
             if(_.isObjectLike(promise)) {
                 this.waitPromise = promise;
@@ -152,15 +207,27 @@ angular.module('farnsworth')
             return this;
         };
 
+        /**
+         * Set the value of the `aria-label` attribute.
+         *
+         * @param  {string} ariaLabel The value of the attribute
+         * @return {HotkeyDialog}  This so that we can chain calls
+         */
         HotkeyDialog.prototype.aria = function(ariaLabel) {
             this.dialog.locals.ariaLabel = ariaLabel;
             return this;
         };
 
+        /**
+         * Show the dialog, returning a promise that will be resolved
+         * with the user's selected action, much like `$mdDialog`.
+         *
+         * @return {Promise} The promise resolved when the user selects an action
+         */
         HotkeyDialog.prototype.show = function() {
             return $mdDialog.show(this.dialog);
         };
-
+        
         return function() {
             return new HotkeyDialog();
         }

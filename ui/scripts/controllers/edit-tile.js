@@ -79,6 +79,16 @@ angular.module('farnsworth')
                 self.categories[tile.category].tiles.push(tile);
             }
 
+            _.each(self.categories, function(category) {
+                var existingTile = _.findIndex(category.tiles, function(candidate) {
+                    return candidate === tile;
+                });
+
+                if(existingTile !== -1 && category.name !== category.tiles[existingTile].category) {
+                    category.tiles.splice(existingTile, 1);
+                }
+            })
+
             SettingsService.save().then(function() {
                 $window.history.back();
             }).catch(function(error) {

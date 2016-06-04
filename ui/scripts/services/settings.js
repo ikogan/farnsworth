@@ -33,8 +33,12 @@ angular.module('farnsworth')
 
             if(!service.settings || reload) {
                 fs.readFile(path, function(error, data) {
+                    // If we fail reading this file, we should try to read from the backup
                     var useBackup = false;
 
+                    // If the file doesn't exist at all, we assume that this is a first
+                    // run. TODO: We should probably use the backup instead just in case
+                    // the file was deleted for some reason.
                     if(error) {
                         service.settings = {};
                         defered.resolve(service.settings);
@@ -42,9 +46,17 @@ angular.module('farnsworth')
                         try {
                             service.settings = JSON.parse(data);
 
+                            // If the result is not a plain object or the categories
+                            // aren't, then something is corrupt, use the backup.
+                            //
+                            // This mostly occurred during development before the
+                            // format was stabilized but does help prevent getting
+                            // into weird states the user can't get out of without
+                            // manual surgery.
                             if(!_.isPlainObject(service.settings) || !_.isPlainObject(service.settings.categories)) {
                                 useBackup = 'Saved settings are not valid.';
                             } else {
+                                // If we successfully read the file, save it as a backup.
                                 service.save(true);
 
                                 defered.resolve(service.settings);
@@ -54,6 +66,8 @@ angular.module('farnsworth')
                         }
 
                         if(useBackup !== false) {
+                            // Let the user know that their main settings file
+                            // is hosed.
                             $mdToast.show(
                               $mdToast.simple()
                                 .textContent(useBackup)
@@ -66,6 +80,8 @@ angular.module('farnsworth')
                                     try {
                                         service.settings = JSON.parse(data);
 
+                                        // This time, if things don't work, just
+                                        // start up as if it's a first run.
                                         if(!_.isPlainObject(service.settings)) {
                                             service.settings = {};
                                         }

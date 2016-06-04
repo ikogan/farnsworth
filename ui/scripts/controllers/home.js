@@ -9,8 +9,10 @@ angular.module('farnsworth')
     .controller('HomeController', function($location, $mdToast, $mdDialog, $timeout, $q,
             $scope, $route, $document, hotkeys, duScrollDuration,
             duScrollEasing, SettingsService, BackgroundsService, HotkeyDialog) {
-        var slash = require('slash');               // Convert Windows paths to something we can use in `file:///` urls.
-        var app = require('electron').remote.app;   // Needed to close the application.
+        var slash = require('slash');           // Convert Windows paths to something we can use in `file:///` urls.
+        var electron = require('electron');
+        var app = electron.remote.app;          // Needed to close the application.
+        var ipc = electron.ipcRenderer;         // For app launching.
 
         var self = this;
         var constants = {
@@ -34,6 +36,13 @@ angular.module('farnsworth')
         self.selectedTile = null;               // A reference to the currently selected tile.
         self.selectedTileIndex = 0;             // The index of the currently selected tile.
         self.editingCategories = false;         // Whether or not we're editing the list of categories.
+
+        ipc.on('appliation-launch-error', function(code) {
+            $mdToast.show(
+              $mdToast.simple()
+                .textContent('The application terminated with an error.')
+                    .hideDelay(3000));
+        });
 
         SettingsService.get().then(function(settings) {
             self.settings = settings;
@@ -67,6 +76,10 @@ angular.module('farnsworth')
             });
         });
 
+        /**
+         * Set a random background image based on the backgrounds
+         * we've downloaded in the main app.
+         */
         self.setRandomBackground = function() {
             BackgroundsService.getRandomBackground().then(function(background) {
                 self.background = background;
@@ -141,8 +154,8 @@ angular.module('farnsworth')
                 }]
             };
 
-            // Make sure we ignore transient categories when building the list
-            // as we're going to add them later.
+            // Make a list of categories so it's easier to navigate
+            // up and down.
             self.categoryList = self.makeCategoryList();
             self.selectedCategory = self.categoryList[self.selectedCategoryIndex];
 
@@ -494,6 +507,8 @@ angular.module('farnsworth')
                 combo: 'enter',
                 description: 'Edit the selected category',
                 callback: function() {
+                    // If we don't have any category selected, then we've chosen
+                    // to stop editing categories, reset things.
                     if(self.selectedCategory === null) {
                         self.editingCategories = false;
                         self.selectedCategoryIndex = self.categoryList.length - 1;
@@ -504,6 +519,8 @@ angular.module('farnsworth')
                         self.setupBindings();
                         return;
                     } else if(self.moving) {
+                        // Otherwise, if we're moving categories, then it's time
+                        // to save the new location.
                         SettingsService.save().catch(function() {
                             $mdToast.show(
                               $mdToast.simple()
@@ -514,6 +531,9 @@ angular.module('farnsworth')
                             self.moving = false;
                         });
                     } else {
+                        // So we have a category selected, and we're not moving,
+                        // so it's time to let the user choose what they want to
+                        // do with the seelcted categories, bring up the popup.
                         self.disableBindings();
 
                         HotkeyDialog()
@@ -534,16 +554,20 @@ angular.module('farnsworth')
                             .then(function(result) {
                                 switch(result.caption) {
                                     case 'Arrange':
+                                        // Switch into move mode and restart category editing
                                         self.moving = true;
                                         self.editCategories(self.selectedCategoryIndex);
                                         break;
                                     case 'Rename':
+                                        // Bring up the rename dialog
                                         self.renameCategory();
                                         break;
                                     case 'Delete':
+                                        // Bring up the delete confirmation.
                                         self.deleteCategory();
                                         break;
                                     default:
+                                        // Cancel the popup and go back to normal
                                         self.editCategories(self.selectedCategoryIndex);
                                 }
 
@@ -578,10 +602,13 @@ angular.module('farnsworth')
                     });
                 }
             }).then(function() {
+                // Make sure we update the category name in all the tiles as well
                 _.each(self.selectedCategory.tiles, function(tile) {
                     tile.category = self.selectedCategory.name;
                 });
 
+                // Save the category, reinitialize our categories, and
+                // go back to category editing mode
                 return SettingsService.save().then(function() {
                     self.init();
                     self.editCategories(self.selectedCategoryIndex);
@@ -700,6 +727,8 @@ angular.module('farnsworth')
                 if(_.has(self, func)) {
                     self[func]();
                 }
+            } else {
+                ipc.send('launch-application', tile.command);
             }
         };
 
