@@ -18,4 +18,29 @@ cd farnsworth
 npm install && npm start
 ```
 
-#### License [CCAL-4.0](LICENSE.md)
+## Packaging
+
+Currently, packages are generated with gulp:
+
+```bash
+npm install -g gulp
+npm install
+gulp
+```
+
+## TODO
+
+At the moment, this is completele enough to use for my own purposes but there
+is much left that should be done:
+
+-   Avoid packaging development modules
+-   Windows Installer, Mac DMG, Linux packages
+-   Keyboard support for edit tiles and settings screens
+-   Refactor controls to be more generic, grid based?
+-   Native support for game controllers
+-   "Profiles" for a given tile: launch the tile command differently
+    depending on a profile selected at launch time.
+-   Customizable background color, image, list URL
+-   Cleanup as indicated in the source
+
+### License [Apache-2.0](LICENSE.md)

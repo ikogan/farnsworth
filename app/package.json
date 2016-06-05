@@ -1,0 +1,54 @@
+{
+  "name": "farnsworth-launcher",
+  "version": "0.1.0",
+  "description": "Fullscreen Application Launcher for TVs",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron main.js",
+    "debug": "electron --debug-brk main.js",
+    "package": "electron-packager "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@bitbucket.org:ikogan/farnsworth.git"
+  },
+  "keywords": [
+    "Electron",
+    "quick",
+    "start",
+    "tutorial"
+  ],
+  "author": "Ilya Kogan <ikogan@mythicnet.org>",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://bitbucket.org/ikogan/farnsworth"
+  },
+  "homepage": "https://bitbucket.org/ikogan/farnsworth#readme",
+  "devDependencies": {
+    "angular-mocks": "^1.5.5",
+    "electron-prebuilt": "1.2.1"
+  },
+  "dependencies": {
+    "angular": "^1.5.5",
+    "angular-animate": "^1.5.5",
+    "angular-aria": "^1.5.5",
+    "angular-hotkeys": "^1.7.0",
+    "angular-material": "^1.0.8",
+    "angular-messages": "^1.5.5",
+    "angular-route": "^1.5.5",
+    "angular-sanitize": "^1.5.5",
+    "angular-scroll": "^1.0.0",
+    "debug": "^2.2.0",
+    "download": "^5.0.0",
+    "fs-extra": "^0.30.0",
+    "lodash": "^4.11.1",
+    "material-design-icons": "^2.2.3",
+    "md-color-picker": "^0.2.6",
+    "mousetrap": "^1.5.3",
+    "request": "^2.72.0",
+    "roboto-fontface": "^0.4.5",
+    "sha1": "^1.1.1",
+    "slash": "^1.0.0",
+    "spawn-shell": "^1.1.2"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "plugins": {
+    "lint": {
+      "list-item-spacing": false
+    }
+  },
+  "settings": {
+    "commonmark": true
+  }
+}

@@ -1,53 +1,30 @@
 {
-  "name": "farnsworth-laundher",
-  "version": "1.0.0",
+  "private": true,
+  "name": "farnsworth-launcher",
+  "version": "0.1.0",
   "description": "Fullscreen Application Launcher for TVs",
   "main": "main.js",
   "scripts": {
-    "start": "electron main.js",
-    "debug": "electron --debug-brk main.js"
+    "clean": "rimraf dist",
+    "postinstall": "install-app-deps",
+    "start": "npm install && electron ./app",
+    "dist": "build --win --osx --linux --x64 && build --win --linux --ia32",
+    "dist:darwin": "build --osx",
+    "dist:win64": "build --win --x64",
+    "dist:win32": "build --win --ia32",
+    "dist:linux64": "build --linux --x64",
+    "dist:linux32": "build --linux --ia32"
   },
-  "repository": {
-    "type": "git",
-    "url": "git@bitbucket.org:ikogan/farnsworth.git"
+  "build": {
+    "app-bundle-id": "org.mythicnet.farnsworth",
+    "app-category-type": "public.app-category.utilities",
+    "linux": {
+        "target": ["deb", "rpm", "tar.gz"]
+    }
   },
-  "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial"
-  ],
-  "author": "Ilya Kogan <ikogan@mythicnet.org>",
-  "license": "CPAL-4.0",
-  "bugs": {
-    "url": "https://bitbucket.org/ikogan/farnsworth"
-  },
-  "homepage": "https://bitbucket.org/ikogan/farnsworth#readme",
   "devDependencies": {
-    "angular-mocks": "^1.5.5",
-    "electron-prebuilt": "^0.37.0"
-  },
-  "dependencies": {
-    "angular": "^1.5.5",
-    "angular-animate": "^1.5.5",
-    "angular-aria": "^1.5.5",
-    "angular-hotkeys": "^1.7.0",
-    "angular-material": "^1.0.8",
-    "angular-messages": "^1.5.5",
-    "angular-route": "^1.5.5",
-    "angular-sanitize": "^1.5.5",
-    "angular-scroll": "^1.0.0",
-    "debug": "^2.2.0",
-    "download": "^5.0.0",
-    "fs-extra": "^0.30.0",
-    "lodash": "^4.11.1",
-    "material-design-icons": "^2.2.3",
-    "md-color-picker": "^0.2.6",
-    "mousetrap": "^1.5.3",
-    "request": "^2.72.0",
-    "roboto-fontface": "^0.4.5",
-    "sha1": "^1.1.1",
-    "slash": "^1.0.0",
-    "spawn-shell": "^1.1.2"
+      "electron-builder": "^4.2.2",
+      "electron-prebuilt": "1.2.1",
+      "rimraf": "^2.5.2"
   }
 }

@@ -82,7 +82,7 @@ function downloadBackgrounds() {
                                 // Save the backgrounds file. Possibly a minor performance impact
                                 // serializing JSON and writing to disk every time we download an
                                 // image but...see above dad quote.
-                                fs.writeFile(BACKGROUNDS_SAVE_PATH, JSON.stringify(backgrounds), function(error) {
+                                fs.writeFile(BACKGROUNDS_SAVE_PATH, JSON.stringify(backgrounds, null, 4), function(error) {
                                     if(error) {
                                         bgWindow.send('backgrounds-error', 'Could not save backgrounds list', error);
                                     }

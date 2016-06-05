@@ -35,6 +35,10 @@ function createWindow () {
 
     mainWindow.setFullScreen(true);
 
+    if(process.argv.indexOf('--develop') !== -1) {
+        mainWindow.toggleDevTools();
+    }
+
     // and load the index.html of the app.
     mainWindow.loadURL('file://' + __dirname + '/ui/index.html');
 
