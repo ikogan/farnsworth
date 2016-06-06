@@ -72,6 +72,10 @@ function createWindow () {
             someWindow.webContents.goBack();
         }
     });
+
+    mainWindow.on('farnsworth-minimize', function(ev) {
+        mainWindow.minimize();
+    });
 }
 
 // Launch an application as requested by the renderer

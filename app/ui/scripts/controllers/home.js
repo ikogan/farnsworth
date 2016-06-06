@@ -732,6 +732,10 @@ angular.module('farnsworth')
             }
         };
 
+        self.minimize = function() {
+            ipc.send('farnsworth-minimize');
+        };
+
         /**
          * Delete the currently selected tile.
          */
