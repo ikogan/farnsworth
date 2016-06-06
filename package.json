@@ -21,9 +21,6 @@
     "app-category-type": "public.app-category.utilities",
     "linux": {
         "target": ["deb", "rpm", "tar.gz"]
-    },
-    "osx": {
-        "target": ["dmg", "mas"]
     }
   },
   "devDependencies": {
