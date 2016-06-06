@@ -40,6 +40,8 @@ function createWindow () {
     // Turn off fullscreen if requested, useful for debugging
     if(process.argv.indexOf('--windowed') !== -1) {
         options.fullscreen = false;
+        options.frame = true;
+        options.movable = true;
     }
 
     // Create the browser window.
