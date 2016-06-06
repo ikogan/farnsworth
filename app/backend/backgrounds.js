@@ -28,7 +28,7 @@ function cleanBackgrounds(backgrounds) {
                     return f === background.filename;
                 })) {
                     console.log(`Deleting ${f}`);
-                    
+
                     try {
                         fs.unlinkSync(path.join(BACKGROUNDS_DIR, f));
                     } catch(e) {}
@@ -147,7 +147,7 @@ function downloadBackgrounds() {
                             if(backgrounds.length > 0) {
                                 bgService.send('background-data-available', backgrounds);
                             }
-
+                            
                             entries = _.filter(entries, function(entry) {
                                 return _.findIndex(backgrounds, function(background) {
                                     return entry === background.filename;

@@ -32,8 +32,21 @@ body {
     cursor: pointer;
 }
 
+/* This is a litte weird, but if we don't have *some* kind of padding, the
+ * container itself seems to get a margin of some kind. At least, the
+ * background doesn't stretch to the top of the toolbar properly.
+ */
+.background-container {
+    padding-top: 1px;
+}
+
 md-input-container + .md-button {
     height: 5px;
+}
+
+.no-content-card > img {
+    max-width: 650px;
+    max-height: 433px;
 }
 
 .vertical-divider {

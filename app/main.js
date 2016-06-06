@@ -1,5 +1,9 @@
 'use strict';
 
+if(require('electron-squirrel-startup')) {
+    return;
+}
+
 const debug = require('debug')('farnsworth:main');
 const electron = require('electron');
 const spawn = require('spawn-shell');
@@ -32,12 +36,12 @@ function createWindow () {
         backgroundColor: '#000',
         titleBarStyle: 'hidden'
     };
-    
+
     // Turn off fullscreen if requested, useful for debugging
     if(process.argv.indexOf('--windowed') !== -1) {
         options.fullscreen = false;
     }
-    
+
     // Create the browser window.
     mainWindow = new BrowserWindow(options);
 
