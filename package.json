@@ -7,6 +7,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "postinstall": "install-app-deps",
+    "debug": "npm install && electron --debug --debug-brk ./app",
     "start": "npm install && electron ./app",
     "dist": "build --win --osx --linux --x64 && build --win --linux --ia32",
     "dist:darwin": "build --osx",

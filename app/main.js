@@ -23,18 +23,31 @@ function init() {
 
 // Create the main window, mostly unchanged from the template
 function createWindow () {
-    // Create the browser window.
-    mainWindow = new BrowserWindow({
+    // Setup browser window options
+    var options = {
         movable: false,
         fullscreen: true,
         title: 'Farnsworth Launcher',
         frame: false,
         backgroundColor: '#000',
         titleBarStyle: 'hidden'
-    });
+    };
+    
+    // Turn off fullscreen if requested, useful for debugging
+    if(process.argv.indexOf('--windowed') !== -1) {
+        options.fullscreen = false;
+    }
+    
+    // Create the browser window.
+    mainWindow = new BrowserWindow(options);
 
-    mainWindow.setFullScreen(true);
+    // TODO: Can't recall why we call this if we set it in the options
+    // remove?
+    if(options.fullscreen) {
+        mainWindow.setFullScreen(true);
+    }
 
+    // Automatically start dev tools if we're trying to develop
     if(process.argv.indexOf('--develop') !== -1) {
         mainWindow.toggleDevTools();
     }

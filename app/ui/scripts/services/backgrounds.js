@@ -12,12 +12,7 @@ angular.module('farnsworth')
         var ipc = electron.ipcRenderer;
         var app = electron.remote.app;
 
-        // We keep this here to make loading of backgrounds a bit faster...though
-        // since we now load this from disk first in main as well, it doesn't
-        // make much sense...TODO: Remove this and just get it from main.
-        const BACKGROUND_FILE = app.getPath('userData') + '/backgrounds.json';
-
-        // TODO: Load this form main too, possibly as part of the background data?
+        // TODO: Load this from main too, possibly as part of the background data?
         const BACKGROUNDS_DIR = app.getPath('userData') + '/backgrounds';
 
         var service = {};
@@ -34,7 +29,7 @@ angular.module('farnsworth')
 
         // Listen for at least one background to be available and resolve
         // the promise.
-        ipc.on('background-available', function(sender, index, background) {
+        ipc.on('background-available', function(sender, background, index) {
             bgAvailable.resolve(background, index);
         });
 
@@ -76,33 +71,39 @@ angular.module('farnsworth')
             var waits = [service.waitForBackgroundData, service.waitForBackground];
 
             $q.all(waits).then(function(bgData) {
+                var background = bgData[1];
                 bgData = _.filter(bgData[0], function(entry) {
-                    if(entry.downloaded) {
-                        try {
-                            fs.accessSync(path.join(BACKGROUNDS_DIR, entry.filename));
-                            return true;
-                        } catch(e) {
-                            return false;
-                        }
-                    } else {
-                        return false;
-                    }
+                    return entry.downloaded;
                 });
+
+                if(bgData.length !== 0) {
+                    background = null;
+                } else if(background !== null) {
+                    background = {
+                        filename: path.join(BACKGROUNDS_DIR, background.filename),
+                        metadata: background
+                    };
+                }
 
                 // Choose a random background to start with.
                 var index = Math.floor(Math.random() * (bgData.length - 1));
                 var checked = []; // Make sure we don't keep checking forever if we can never find a background
-                var background = null; // The background to use
 
                 // Keep looping so long as we haven't found a background that isn't the last
                 // background we've used and we haven't mmade as many checks as there are entries.
                 while((!background || background === lastBackground) && checked.length < bgData.length) {
                     checked.push(index);
 
-                    background = {
-                        filename: path.join(BACKGROUNDS_DIR, bgData[index].filename),
-                        metadata: bgData[index]
-                    };
+                    var filename = path.join(BACKGROUNDS_DIR, bgData[index].filename);
+
+                    try {
+                        fs.accessSync(filename, fs.R_OK);
+
+                        background = {
+                            filename: filename,
+                            metadata: bgData[index]
+                        };
+                    } catch(e) {}
 
                     while(checked.indexOf(index) !== -1) {
                         index = Math.floor(Math.random() * (bgData.length - 1));
