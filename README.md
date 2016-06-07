@@ -78,5 +78,7 @@ is much left that should be done:
     depending on a profile selected at launch time.
 -   Customizable background color, image, list URL
 -   Cleanup as indicated in the source
+-   Scrolling the view up and down so more than 3 categories is workable...
+    don't kill me.
 
 ## License [Apache-2.0](LICENSE.md)

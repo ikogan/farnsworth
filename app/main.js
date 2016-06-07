@@ -17,6 +17,8 @@ const app = electron.app;
 const ipc = electron.ipcMain;
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow;
+// We need to handle command launching a little differently if we're on Windows
+const isWindows = /^win/.test(process.platform);
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -86,6 +88,11 @@ ipc.on('farnsworth-minimize', function(ev) {
 // Launch an application as requested by the renderer
 ipc.on('launch-application', function(ev, command) {
     debug(`Launching ${command}...`);
+
+    if(!isWindows) {
+        command = sq.parse(command);
+        command = sq.quote(command);
+    }
 
     var child = spawn(`"${command}"`);
 
