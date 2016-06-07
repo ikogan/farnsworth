@@ -666,7 +666,7 @@ angular.module('farnsworth')
             };
 
             if(tile.image) {
-                style['background-image'] = 'url(file:///' + slash(tile.image) + ')';
+                style['background-image'] = 'url("file:///' + slash(tile.image) + '")';
             }
 
             if(self.editingCategories || (self.moving && self.selectedTile !== tile)) {
