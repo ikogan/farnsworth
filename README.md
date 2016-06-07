@@ -28,10 +28,10 @@ time. Ideally, the [Gamepad
 API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API)
 will be more supported in browsers and thus Chromium in the future. At the
 moment, [AutoHotkey](https://autohotkey.com/) can be used to support arbitrary
-keymappings. The following is an example script:
+keymappings.
 
-```au3
-```
+Additionally, Valve's Steam Controller seems to emulate the keyboard when
+in desktop mode and works fine.
 
 ## Development
 
