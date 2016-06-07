@@ -48,6 +48,7 @@
     "request": "^2.72.0",
     "roboto-fontface": "^0.4.5",
     "sha1": "^1.1.1",
+    "shell-quote": "^1.6.0",
     "slash": "^1.0.0",
     "spawn-shell": "^1.1.2"
   }

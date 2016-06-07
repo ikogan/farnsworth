@@ -5,8 +5,10 @@ if(require('electron-squirrel-startup')) {
 }
 
 const debug = require('debug')('farnsworth:main');
+const _ = require('lodash');
 const electron = require('electron');
 const spawn = require('spawn-shell');
+const sq = require('shell-quote');
 const downloadBackgrounds = require('./backend/backgrounds');
 
 // Module to control application life.
@@ -74,16 +76,15 @@ function createWindow () {
             someWindow.webContents.goBack();
         }
     });
-
-    mainWindow.on('farnsworth-minimize', function(ev) {
-        mainWindow.minimize();
-    });
 }
+
+// Minimize the application if the renderer requested it.
+ipc.on('farnsworth-minimize', function(ev) {
+    mainWindow.minimize();
+});
 
 // Launch an application as requested by the renderer
 ipc.on('launch-application', function(ev, command) {
-    command = command.replace(/ /g, '\\ ');
-
     debug(`Launching ${command}...`);
 
     var child = spawn(`"${command}"`);
