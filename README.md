@@ -60,7 +60,7 @@ AppsKey::Send #{Tab}
 
 ```bash
 # Clone this repository
-git clone git clone git@bitbucket.org:ikogan/farnsworth.git
+git clone git@github.com:ikogan/farnsworth.git
 # Go into the repository
 cd farnsworth
 # Install dependencies and run the app
