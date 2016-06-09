@@ -6,7 +6,7 @@ is optimized for use with a keyboard, remote, or controller
 (see Remote & Controller section below as that requires some further
 setup).There is no "media" functionality, that is, no video or music library
 or support for live TV. Farnsworth's purpose is to simply launch other
-applications and get out of the way. Farnsworth is heavily inspired on the
+applications and get out of the way. Farnsworth is heavily inspired by the
 [Android TV Launcher](https://play.google.com/store/apps/details?id=com.google.android.leanbacklauncher&hl=en)
 though is simplified in many ways.
 
@@ -35,7 +35,7 @@ moment, [AutoHotkey](https://autohotkey.com/) can be used to support arbitrary
 key mappings.
 
 Additionally, Valve's Steam Controller also works quite well. Most remotes
-that emulate a keyboard seem to work well as well. Farnsworth was primarily
+that emulate a keyboard seem to work well too. Farnsworth was primarily
 tested with [this one](http://www.amazon.com/LYNEC-C2-Wireless-Keyboard-Infrared/dp/B00U78EKM4).
 
 The following simple [AutoHotkey](https://autohotkey.com/) script is useful
@@ -67,8 +67,9 @@ cd farnsworth
 npm install && npm start
 ```
 
-Debugging may be accomplished with `npm run debug`. The following command line
-options are supported:
+Debugging may be accomplished with `npm run debug` and attaching
+with an appropriate debugger to the standard port. The following command 
+line options are supported:
 
 -   `--develop`: Open developer tools once the renderer starts up.
 -   `--windowed`: Do not fullscreen automatically.
