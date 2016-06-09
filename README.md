@@ -10,6 +10,11 @@ applications and get out of the way. Farnsworth is heavily inspired on the
 [Android TV Launcher](https://play.google.com/store/apps/details?id=com.google.android.leanbacklauncher&hl=en)
 though is simplified in many ways.
 
+![Category Layout](/doc/category-names.png?raw=true "Tiles with Category Names")
+![Tile Layout](/doc/no-category-names.png?raw=true "Tiles without Category Names")
+![Manage Tile Popup](/doc/edit-popup.png?raw=true "Managing a Tile")
+![Edit Tile](/doc/edit-tile.png?raw=true "Edit Tile Settings")
+
 The launcher allows the setup of individual "Categories" containing
 "Tiles". At this time, creating new tiles requires the use of a mouse or
 touchscreen due to it being a bit complicated to add keyboard support for
@@ -24,14 +29,32 @@ by pushing `?`.
 
 Due to limitations in the [mousetrap](https://github.com/ccampbell/mousetrap)
 library as well as Chromium, there is no support for game controllers at this
-time. Ideally, the [Gamepad
-API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API)
+time. Ideally, the [Gamepad API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API)
 will be more supported in browsers and thus Chromium in the future. At the
 moment, [AutoHotkey](https://autohotkey.com/) can be used to support arbitrary
-keymappings.
+key mappings.
 
-Additionally, Valve's Steam Controller seems to emulate the keyboard when
-in desktop mode and works fine.
+Additionally, Valve's Steam Controller also works quite well. Most remotes
+that emulate a keyboard seem to work well as well. Farnsworth was primarily
+tested with [this one](http://www.amazon.com/LYNEC-C2-Wireless-Keyboard-Infrared/dp/B00U78EKM4).
+
+The following simple [AutoHotkey](https://autohotkey.com/) script is useful
+for closing and switching apps:
+
+```ahk
+Escape::
+Browser_Home::
+    WinGet, ActiveWindow, ProcessName, A
+
+    if (ActiveWindow != "Farnsworth Launcher.exe")
+    {
+        Send !{F4}
+    }
+
+    return
+
+AppsKey::Send #{Tab}
+```
 
 ## Development
 
