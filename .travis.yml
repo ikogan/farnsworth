@@ -3,16 +3,13 @@ osx_image: xcode7.3
 sudo: required
 dist: trusty
 
-language: c
+language: nodejs
+nodejs:
+    - "6"
 
 matrix:
-    include:
-        - os: osx
-        - os: linux
-          env: CC=clang CXX=clang++ npm_config_clang=1
-        - os: win
-        - arch: x86
-        - arch: x64
+    - os: osx
+    - os: linux
 
 cache:
     directories:
@@ -20,33 +17,25 @@ cache:
     - app/node_modules
     - $HOME/.electron
 
-addons:
-    apt:
-        sources:
-            - ubuntu-toolchain-r-test
-            - ubuntu-wine
-            - llvm-toolchain-precise-3.8
-        packages:
-            - wine1.8
-            - icnsutils
-            - graphicsmagick
-            - xz-utils
-            - rpm
-            - mono-devel
-            - ca-certificates-mono
-            - gcc-multilib
-            - g++-multilib
-            - clang-3.8
+before_install:
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; sudo apt-add-repository ppa:ubuntu-wine/ppa -y; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; sudo apt-add-repository ppa:likemartinma/osslsigncode -y; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; sudo apt-get update; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; sudo apt-get install build-essential icnsutils graphicsmagick xz-utils rpm wine1.8 mono-devel ca-certificates-mono osslsigncode gcc-multilib g++-multilib -y --no-install-recommends; fi
 
 install:
-- nvm install 6
-- npm install electron-builder
 - npm install
 - npm prune
 
 script:
-- npm run dist
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; npm run dist:win64; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; npm run dist:win32; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; npm run dist:linux64; fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; npm run dist:linux32; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx"]; npm run dist:darwin; fi
 
 branches:
-  except:
-    - "/^v\\d+\\.\\d+\\.\\d+$/"
+  only:
+      -travis
