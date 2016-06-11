@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+echo "Installing dependenceis for ${TRAVIS_OS_NAME}..."
+
 if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
     sudo apt-add-repository ppa:ubuntu-wine/ppa -y
     sudo apt-add-repository ppa:likemartinma/osslsigncode -y
@@ -8,6 +10,7 @@ if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
 
     echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list
 
+    sudo dpkg --add-architecture i386
     sudo apt-get update
     sudo apt-get install build-essential icnsutils graphicsmagick xz-utils rpm wine1.8 mono-devel ca-certificates-mono osslsigncode gcc-multilib g++-multilib -y --no-install-recommends
 fi

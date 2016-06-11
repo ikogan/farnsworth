@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+echo "Building on ${TRAVIS_OS_NAME}..."
+
 if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
     npm run dist:win64
     npm run dist:win32
