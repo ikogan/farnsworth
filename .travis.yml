@@ -1,18 +1,13 @@
-osx_image: xcode7.3
-
 sudo: required
 dist: trusty
 
-language: c
+language: node_js
+node_js:
+    - "6"
 
-matrix:
-    include:
-        - os: osx
-        - os: linux
-          env: CC=clang CXX=clang++ npm_config_clang=1
-        - os: win
-        - arch: x86
-        - arch: x64
+os:
+    - osx
+    - linux
 
 cache:
     directories:
@@ -20,33 +15,16 @@ cache:
     - app/node_modules
     - $HOME/.electron
 
-addons:
-    apt:
-        sources:
-            - ubuntu-toolchain-r-test
-            - ubuntu-wine
-            - llvm-toolchain-precise-3.8
-        packages:
-            - wine1.8
-            - icnsutils
-            - graphicsmagick
-            - xz-utils
-            - rpm
-            - mono-devel
-            - ca-certificates-mono
-            - gcc-multilib
-            - g++-multilib
-            - clang-3.8
+before_install:
+    - .travis/install-dependencies.sh
 
 install:
-- nvm install 6
-- npm install electron-builder
 - npm install
 - npm prune
 
 script:
-- npm run dist
+    - .travis/build.sh
 
 branches:
-  except:
-    - "/^v\\d+\\.\\d+\\.\\d+$/"
+  only:
+      - travis
