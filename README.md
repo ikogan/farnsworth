@@ -1,4 +1,4 @@
-# Farnsworth Launcher
+# Farnsworth Launcher ![Travis Build](https://travis-ci.org/ikogan/farnsworth.svg?branch=master)
 
 A simple [Electron](http://electron.atom.io/) based,
 configurable launcher for systems connected to a TV. Farnsworth
@@ -68,7 +68,7 @@ npm install && npm start
 ```
 
 Debugging may be accomplished with `npm run debug` and attaching
-with an appropriate debugger to the standard port. The following command 
+with an appropriate debugger to the standard port. The following command
 line options are supported:
 
 -   `--develop`: Open developer tools once the renderer starts up.
