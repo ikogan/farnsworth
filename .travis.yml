@@ -30,13 +30,7 @@ deploy:
   api_key:
     secure: vRjTudDpfxtoT3MzxRnITwBu3dLiDp7/xp4tw52A9oAX22T4C9+7xn17tJxfYBLk0rjhjgixCw0yhfe9dwI5AteGA9PUxjN7F2E2JVpNzj5umBVuZSFGFsmmJa/3ZWjlV8lItJ0ZLirLFRj3Cpd0Vwl3J6y/rTINB/C9P5fU14sTfQI8eaZz8eZqG4cmaKu2YdkLsYdcduQPrfj91ag3u0ggCiyd+k3ZAdEpC9nOQjWRBr6EaMVJ0+X6e9o940n0HL336Yw7dZ7+iXwcF2uLWnS8Ye8Uy3sMFL0jEzdwK0sU2pyMqNvrejhMDOSofMV/sP4+UTX2KAeh36ghGMFRlF2pwdMAMD1zjD7G+0RwZrkjZiDTQ2MyabK2Gs+W2gWcIdsEecAscK/19OF6iEc4vSaCzk1pAyCivJrPVOeStMC0z4bxmtJMbIRP9mGkCshf5ajldrNkMtT1EV3v3p+WSaAXb76iEj3Vc+pt3rXf4lIf3qjlCdit/VBATNZzwuYj4FTDbQ7x7t4j6xCHIyukWmNLTOReSEnktW2BK5z7i/G+4vSq39veORpG7k12f2eV6verd2H0RmUbKdsBNjAUbiMx8RxnUKFFXld1JmJAqHqf6YC7H+YdFttTV/BILc6SUvxqND74zFk0+tD+tLfmr9SEfTtEyxNSncI1j1rqGjU=
   file_glob: true
-  files:
-      - dist/osx/Farnsworth Launcher-*.dmg
-      - dist/win/Farnsworth Launcher Setup*.exe
-      - dist/win-ia32/Farnsworth Launcher Setup*-ia32.exe
-      - dist/farnsworth-launcher-*.deb
-      - dist/farnsworth-launcher-*.rpm
-      - dist/farnsworth-launcher-*.tar.gz
+  file: dist/release/*
   skip_cleanup: true
   on:
     repo: ikogan/farnsworth
