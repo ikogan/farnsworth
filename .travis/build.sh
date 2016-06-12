@@ -22,5 +22,3 @@ else
     echo "Unhandled operating ${TRAVIS_OS_NAME}!"
     exit 1
 fi
-
-ls dist/release
