@@ -3,7 +3,7 @@ set -e
 
 echo "Building on ${TRAVIS_OS_NAME}..."
 
-mkdir dist/release
+mkdir -p dist/release
 
 if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
     npm run dist:win64
