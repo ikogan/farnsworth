@@ -20,10 +20,9 @@ The launcher allows the setup of individual "Categories" containing
 touchscreen due to it being a bit complicated to add keyboard support for
 `md-color-picker`.
 
-The grid of categories/tiles can be controlled entirely with the keyboard
-(in fact, mouse support isn't implemented at this time). Help for keybindings
-is available at any time (when not in the edit tile or settings sections)
-by pushing `?`.
+The grid of categories/tiles can be controlled entirely with the keyboard.
+Help for keybindings is available at any time (when not in the edit tile
+or settings sections) by pushing `?`.
 
 ## Remote & Controller
 
