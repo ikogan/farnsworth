@@ -8,7 +8,7 @@
 angular.module('farnsworth')
     .factory('$error', function($mdDialog) {
         return function(rejection, action, ev) {
-            var error = "An unhandled error has occurred.";
+            var error = 'An unhandled error has occurred.';
 
             if(typeof rejection === 'string') {
                 error = rejection;
@@ -34,5 +34,5 @@ angular.module('farnsworth')
             }
 
             $mdDialog.show(dialog);
-        }
+        };
     });

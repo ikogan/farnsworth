@@ -27,8 +27,8 @@
         <div class='category-tiles' layout="row" ng-attr-id='{{ controller.getCategoryId(category) }}'>
             <md-card ng-repeat="tile in category.tiles track by $index" ng-style='controller.getTileStyle(tile);'
                 ng-class='{"tile-selected": controller.selectedTile === tile}'
-                ng-mousedown='controller.hold($event, tile);' ng-mouseup='controller.release($event);'
-                ng-keydown='controller.hold($event, tile);' ng-keyup='controller.release($event);'
+                ng-mouseover='controller.selectTile(tile)'
+                ng-click='controller.activate(tile)'
                 ng-attr-id='{{ controller.getTileId(tile) }}'>
                 <div ng-class='{"tile-image": tile.image, "tile-text": !tile.image}'>
                     <span>{{ tile.name }}</span>

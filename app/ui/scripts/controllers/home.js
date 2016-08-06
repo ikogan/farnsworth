@@ -37,7 +37,7 @@ angular.module('farnsworth')
         self.selectedTileIndex = 0;             // The index of the currently selected tile.
         self.editingCategories = false;         // Whether or not we're editing the list of categories.
 
-        ipc.on('appliation-launch-error', function(code) {
+        ipc.on('appliation-launch-error', function() {
             $mdToast.show(
               $mdToast.simple()
                 .textContent('The application terminated with an error.')
@@ -118,39 +118,39 @@ angular.module('farnsworth')
             // Hardcoded System tiles for editing categories, adding new
             // tiles, exiting, etc.
             self.categories['System'] = {
-                'name': 'System',
-                'order': _.reduce(self.categories, function(max, category) {
+                name: 'System',
+                order: _.reduce(self.categories, function(max, category) {
                     return (category.order && category.order > max) ? category.order : (max || 0);
                 }) + 1,
-                'transient': true,
-                'tiles': [{
-                    'name': 'Add Tile',
-                    'category': 'System',
-                    'transient': true,
-                    'backgroundColor': constants.systemBackgroundColor,
-                    'textColor': constants.systemTextColor,
-                    'command': 'about:farnsworth/add-tile'
-                },{
-                    'name': 'Edit Categories',
-                    'category': 'System',
-                    'transient': true,
-                    'backgroundColor': constants.systemBackgroundColor,
-                    'textColor': constants.systemTextColor,
-                    'command': 'about:farnsworth/edit-categories'
-                },{
-                    'name': 'Settings',
-                    'category': 'System',
-                    'transient': true,
-                    'backgroundColor': constants.systemBackgroundColor,
-                    'textColor': constants.systemTextColor,
-                    'command': 'about:farnsworth/app-settings'
-                },{
-                    'name': 'Exit',
-                    'category': 'System',
-                    'transient': true,
-                    'backgroundColor': constants.systemBackgroundColor,
-                    'textColor': constants.systemTextColor,
-                    'command': 'about:farnsworth/exit'
+                transient: true,
+                tiles: [{
+                    name: 'Add Tile',
+                    category: 'System',
+                    transient: true,
+                    backgroundColor: constants.systemBackgroundColor,
+                    textColor: constants.systemTextColor,
+                    command: 'about:farnsworth/add-tile'
+                }, {
+                    name: 'Edit Categories',
+                    category: 'System',
+                    transient: true,
+                    backgroundColor: constants.systemBackgroundColor,
+                    textColor: constants.systemTextColor,
+                    command: 'about:farnsworth/edit-categories'
+                }, {
+                    name: 'Settings',
+                    category: 'System',
+                    transient: true,
+                    backgroundColor: constants.systemBackgroundColor,
+                    textColor: constants.systemTextColor,
+                    command: 'about:farnsworth/app-settings'
+                }, {
+                    name: 'Exit',
+                    category: 'System',
+                    transient: true,
+                    backgroundColor: constants.systemBackgroundColor,
+                    textColor: constants.systemTextColor,
+                    command: 'about:farnsworth/exit'
                 }]
             };
 
@@ -173,7 +173,7 @@ angular.module('farnsworth')
         self.makeCategoryList = function() {
             var partition = _.partition(self.categories, function(category) {
                 return !category.transient;
-            })
+            });
 
             return _.concat(_.sortBy(partition[0], 'order'), partition[1]);
         };
@@ -334,7 +334,7 @@ angular.module('farnsworth')
                                 self.activate(self.selectedTile);
                             }
                         }
-                    }
+                    };
                 }
 
                 hotkeys.bindTo($scope).add({
@@ -343,10 +343,28 @@ angular.module('farnsworth')
                     description: 'Activate the selected tile. Hold to edit instead',
                     callback: handler
                 });
-            }
+            };
 
             addEnterHotkey('keydown');
-        }
+        };
+
+        /**
+         * Select the specified tile.
+         * 
+         * @param {object} tile The tile to select.
+         */
+        self.selectTile = function(tile) {
+            self.selectedTile = tile;
+            self.selectedCategory = tile.category;
+
+            self.selectedCategoryIndex = _.findIndex(self.categoryList, function(item) {
+                item.name === self.selectedCategory.name;
+            });
+
+            self.selectedTileIndex = _.findIndex(self.selectedCategory.tiles, function(item) {
+                item.name === tile.name;
+            });
+        };
 
         /**
          * Scroll the specified tile into view.
@@ -662,7 +680,7 @@ angular.module('farnsworth')
         self.getTileStyle = function(tile) {
             var style = {
                 'background-color': tile.backgroundColor,
-                'color': tile.textColor
+                color: tile.textColor
             };
 
             if(tile.image) {
@@ -689,7 +707,7 @@ angular.module('farnsworth')
         self.getTileId = function(tile) {
             if(tile && _.has(self.categories, tile.category)) {
                 var tileId = _.findIndex(self.categories[tile.category].tiles, function(candidate) {
-                    return candidate === tile
+                    return candidate === tile;
                 });
                 return `tile:${tile.category}.${tileId}`;
             } else {
@@ -728,6 +746,11 @@ angular.module('farnsworth')
                     self[func]();
                 }
             } else {
+                $mdToast.show(
+                    $mdToast.simple()
+                        .textContent(`Launching ${tile.name}...`)
+                            .hideDelay(3000));
+
                 ipc.send('launch-application', tile.command);
             }
         };
@@ -750,7 +773,7 @@ angular.module('farnsworth')
                     if(result.caption === 'Yes') {
                         self.selectedCategory.tiles.splice(self.selectedTileIndex, 1);
 
-                        while(self.selectedCategory.tiles.length == 0) {
+                        while(self.selectedCategory.tiles.length === 0) {
                             self.selectedCategory = self.categoryList[++self.selectedCategoryIndex];
                         }
 
@@ -775,10 +798,8 @@ angular.module('farnsworth')
          * - arrange: Rearrange the tile on the screen.
          * - edit: Edit tile properties.
          * - delete: Delete the tile entirely.
-         *
-         * @param  {object} tile The tile to edit.
          */
-        self.startEditing = function(tile) {
+        self.startEditing = function() {
             self.disableBindings();
 
             HotkeyDialog()

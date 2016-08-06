@@ -87,7 +87,7 @@ angular.module('farnsworth')
                 if(existingTile !== -1 && category.name !== category.tiles[existingTile].category) {
                     category.tiles.splice(existingTile, 1);
                 }
-            })
+            });
 
             SettingsService.save().then(function() {
                 $window.history.back();
@@ -104,60 +104,59 @@ angular.module('farnsworth')
          */
         self.addCategory = function() {
             $mdDialog.show({
-                    controller: function($scope, hotkeys) {
-                        $scope.cancel = function() {
-                            return $mdDialog.cancel();
-                        };
+                controller: function($scope, hotkeys) {
+                    $scope.cancel = function() {
+                        return $mdDialog.cancel();
+                    };
 
-                        $scope.save = function() {
-                            return $mdDialog.hide($scope.category);
-                        }
+                    $scope.save = function() {
+                        return $mdDialog.hide($scope.category);
+                    };
 
-                        hotkeys.bindTo($scope).add({
-                            combo: 'enter',
-                            description: 'Add category.',
-                            allowIn: ['INPUT'],
-                            callback: $scope.save
-                        });
-                    },
-                    templateUrl: './views/dialogs/add-category.html',
-                    parent: angular.element(document.body),
-                    clickOutsideToClose: false
-                })
-                .then(function(category) {
-                    if(_.has(self.categories, category)) {
-                        self.tile.category = category;
+                    hotkeys.bindTo($scope).add({
+                        combo: 'enter',
+                        description: 'Add category.',
+                        allowIn: ['INPUT'],
+                        callback: $scope.save
+                    });
+                },
+                templateUrl: './views/dialogs/add-category.html',
+                parent: angular.element(document.body),
+                clickOutsideToClose: false
+            }).then(function(category) {
+                if(_.has(self.categories, category)) {
+                    self.tile.category = category;
 
-                        $mdToast.show(
-                          $mdToast.simple()
-                            .textContent(`${category} already exists`)
-                                .hideDelay(3000));
+                    $mdToast.show(
+                        $mdToast.simple()
+                        .textContent(`${category} already exists`)
+                            .hideDelay(3000));
+                } else {
+                    self.categories[category] = {
+                        name: category,
+                        tiles: []
+                    };
+
+                    // Compute the new category's order based on the existing
+                    // list of categories.
+                    if(_.size(self.categories) === 1) {
+                        self.categories[category].order = 1;
                     } else {
-                        self.categories[category] = {
-                            name: category,
-                            tiles: []
-                        };
-
-                        // Compute the new category's order based on the existing
-                        // list of categories.
-                        if(_.size(self.categories) == 1) {
-                            self.categories[category].order = 1;
-                        } else {
-                            self.categories[category].order = _.reduce(_.filter(self.categories, function(category) {
-                                return !category.transient;
-                            }, function(max, category) {
-                                return (category.order && category.order > max) ? category.order : (max || 0);
-                            })) + 1;
-                        }
-
-                        self.tile.category = category;
-
-                        $mdToast.show(
-                          $mdToast.simple()
-                            .textContent(`Added category ${category}.`)
-                                .hideDelay(3000));
+                        self.categories[category].order = _.reduce(_.filter(self.categories, function(category) {
+                            return !category.transient;
+                        }, function(max, category) {
+                            return (category.order && category.order > max) ? category.order : (max || 0);
+                        })) + 1;
                     }
-                });
+
+                    self.tile.category = category;
+
+                    $mdToast.show(
+                        $mdToast.simple()
+                        .textContent(`Added category ${category}.`)
+                            .hideDelay(3000));
+                }
+            });
         };
     })
     /**
@@ -168,5 +167,5 @@ angular.module('farnsworth')
             return _.filter(input, function(category) {
                 return !category.transient;
             });
-        }
+        };
     });

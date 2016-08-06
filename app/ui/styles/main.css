@@ -81,6 +81,10 @@ md-input-container + .md-button {
     -webkit-filter: blur(1px) grayscale(0.4);
 }
 
+.category-tiles *:focus {
+    outline: none;
+}
+
 .category-tiles {
     overflow-x: scroll;
     overflow-y: hidden;

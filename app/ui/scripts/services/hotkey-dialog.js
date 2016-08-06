@@ -54,7 +54,7 @@
  * supply more actions than simply yes or no.
  */
 angular.module('farnsworth')
-    .service('HotkeyDialog', function($mdDialog, $q, hotkeys) {
+    .service('HotkeyDialog', function($mdDialog, $q) {
         var HotkeyDialog = function() {
             var self = this;
 
@@ -64,13 +64,13 @@ angular.module('farnsworth')
                 controllerAs: 'controller',
                 locals: {
                     dialogActions: [{
-                        'caption': 'No',
-                        'icon': null
+                        caption: 'No',
+                        icon: null
                     }, {
-                        'caption': 'Yes',
-                        'icon': null
+                        caption: 'Yes',
+                        icon: null
                     }],
-                    ariaLabel: "Dialog",
+                    ariaLabel: 'Dialog',
 
                     // Apparently, you can't bind promises in this
                     // to the locals of a controller, they come through
@@ -122,7 +122,7 @@ angular.module('farnsworth')
                         });
                     });
                 }
-            }
+            };
         };
 
         /**
@@ -229,6 +229,6 @@ angular.module('farnsworth')
         };
         
         return function() {
-            return new HotkeyDialog();
-        }
+            return HotkeyDialog();
+        };
     });

@@ -118,7 +118,7 @@ angular.module('farnsworth')
                 _.each(service.settings.categories, function(category) {
                     category.tiles = _.filter(category.tiles, function(tile) {
                         return !tile.transient;
-                    })
+                    });
                 });
             }
         };
@@ -157,7 +157,7 @@ angular.module('farnsworth')
          */
         service.reload = function() {
             return service.get(true);
-        }
+        };
 
         return service;
     });

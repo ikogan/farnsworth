@@ -5,7 +5,6 @@ if(require('electron-squirrel-startup')) {
 }
 
 const debug = require('debug')('farnsworth:main');
-const _ = require('lodash');
 const electron = require('electron');
 const spawn = require('spawn-shell');
 const sq = require('shell-quote');
@@ -74,14 +73,14 @@ function createWindow () {
     });
 
     mainWindow.on('app-command', function(ev, command) {
-        if(command === 'browser-backward' && someWindow.webContents.canGoBack()) {
-            someWindow.webContents.goBack();
+        if(command === 'browser-backward' && mainWindow.webContents.canGoBack()) {
+            mainWindow.webContents.goBack();
         }
     });
 }
 
 // Minimize the application if the renderer requested it.
-ipc.on('farnsworth-minimize', function(ev) {
+ipc.on('farnsworth-minimize', function() {
     mainWindow.minimize();
 });
 
@@ -97,7 +96,12 @@ ipc.on('launch-application', function(ev, command) {
     var child = spawn(`"${command}"`);
 
     child.on('close', function(code) {
-        mainWindow.restore();
+        // Don't restore since we're not minimizing
+        // on Windows due to https://github.com/electron/electron/issues/6036
+        if(!isWindows) {
+            mainWindow.restore();
+        }
+
         mainWindow.focus();
 
         debug(`Command ${command} exited with code ${code}.`);
@@ -107,7 +111,11 @@ ipc.on('launch-application', function(ev, command) {
         }
     });
 
-    mainWindow.minimize();
+    // Don't minimize on Windows due to 
+    // https://github.com/electron/electron/issues/6036
+    if(!isWindows) {
+        mainWindow.minimize();
+    }
 });
 
 // This method will be called when Electron has finished

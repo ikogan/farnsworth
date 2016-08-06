@@ -6,7 +6,7 @@
  * TODO: Add form validation and keyboard navigation.
  */
 angular.module('farnsworth')
-    .controller('SettingsController', function($location, SettingsService) {
+    .controller('SettingsController', function($location, $mdToast, SettingsService) {
         var self = this;
 
         SettingsService.get().then(function(settings) {
@@ -21,11 +21,11 @@ angular.module('farnsworth')
 
         self.cancel = function() {
             $location.path('/');
-        }
+        };
 
         self.save = function() {
             SettingsService.save().then(function() {
                 $location.path('/');
             });
-        }
+        };
     });
