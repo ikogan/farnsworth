@@ -748,7 +748,7 @@ angular.module('farnsworth')
             } else {
                 $mdToast.show(
                     $mdToast.simple()
-                        .textContent(`Launching ${tile.name}...`)
+                        .textContent(`Launching ${tile.name || tile.command}...`)
                             .hideDelay(3000));
 
                 ipc.send('launch-application', tile.command);
