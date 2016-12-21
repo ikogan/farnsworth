@@ -9,16 +9,18 @@
     "postinstall": "install-app-deps",
     "debug": "npm install && electron --debug --debug-brk ./app",
     "start": "npm install && electron ./app",
-    "dist": "build --win --osx --linux --x64 && build --win --linux --ia32",
-    "dist:darwin": "build --osx",
+    "dist": "build --win --mac --linux --x64 && build --win --linux --ia32",
+    "dist:darwin": "build --mac",
     "dist:win64": "build --win --x64",
     "dist:win32": "build --win --ia32",
     "dist:linux64": "build --linux --x64",
     "dist:linux32": "build --linux --ia32"
   },
   "build": {
-    "app-bundle-id": "org.mythicnet.farnsworth",
-    "app-category-type": "public.app-category.utilities",
+    "appId": "org.mythicnet.farnsworth",
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
     "linux": {
         "target": ["deb", "rpm", "tar.gz"]
     }
@@ -26,6 +28,6 @@
   "devDependencies": {
       "electron-builder": "^10.9.2",
       "electron-prebuilt": "1.4.13",
-      "rimraf": "^2.5.2"
+      "rimraf": "^2.5.4"
   }
 }
