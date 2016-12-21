@@ -1,7 +1,7 @@
 {
   "name": "farnsworth-launcher",
   "productName": "Farnsworth Launcher",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Fullscreen Application Launcher for TVs",
   "main": "main.js",
   "scripts": {
@@ -40,15 +40,15 @@
     "debug": "^2.2.0",
     "download": "^5.0.0",
     "electron-squirrel-startup": "^1.0.0",
-    "fs-extra": "^0.30.0",
-    "lodash": "^4.11.1",
+    "fs-extra": "^1.0.0",
+    "lodash": "^4.17.2",
     "material-design-icons": "^2.2.3",
     "md-color-picker": "^0.2.6",
     "mousetrap": "^1.5.3",
     "request": "^2.72.0",
     "roboto-fontface": "^0.4.5",
     "sha1": "^1.1.1",
-    "shell-quote": "^1.6.0",
+    "shell-quote": "^1.6.1",
     "slash": "^1.0.0",
     "spawn-shell": "^1.1.2"
   }

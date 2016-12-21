@@ -355,14 +355,15 @@ angular.module('farnsworth')
          */
         self.selectTile = function(tile) {
             self.selectedTile = tile;
-            self.selectedCategory = tile.category;
 
             self.selectedCategoryIndex = _.findIndex(self.categoryList, function(item) {
-                item.name === self.selectedCategory.name;
+                return item.name === tile.category;
             });
 
+            self.selectedCategory = self.categoryList[self.selectedCategoryIndex];
+
             self.selectedTileIndex = _.findIndex(self.selectedCategory.tiles, function(item) {
-                item.name === tile.name;
+                return item.name === tile.name;
             });
         };
 

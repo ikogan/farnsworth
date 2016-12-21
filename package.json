@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "farnsworth-launcher",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Fullscreen Application Launcher for TVs",
   "main": "main.js",
   "scripts": {
@@ -24,8 +24,8 @@
     }
   },
   "devDependencies": {
-      "electron-builder": "^4.2.2",
-      "electron-prebuilt": "1.2.1",
+      "electron-builder": "^10.9.2",
+      "electron-prebuilt": "1.4.13",
       "rimraf": "^2.5.2"
   }
 }
