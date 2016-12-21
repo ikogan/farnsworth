@@ -17,7 +17,7 @@ if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
     mv -v dist/*.tar.gz dist/release
 elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
     npm run dist:darwin
-    mv -v dist/osx/*.dmg dist/release
+    mv -v dist/mac/*.dmg dist/release
 else
     echo "Unhandled operating ${TRAVIS_OS_NAME}!"
     exit 1
