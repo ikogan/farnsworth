@@ -7,9 +7,9 @@ mkdir -p dist/release
 
 if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
     npm run dist:win64
-    mv -v dist/win/*.exe dist/release
+    mv -v dist/*.exe dist/release
     npm run dist:win32
-    mv -v dist/win-ia32/*.exe dist/release
+    mv -v dist/*.exe dist/release
     npm run dist:linux64
     npm run dist:linux32
     mv -v dist/*.rpm dist/release
