@@ -24,6 +24,19 @@ The grid of categories/tiles can be controlled entirely with the keyboard.
 Help for keybindings is available at any time (when not in the edit tile
 or settings sections) by pushing `?`.
 
+## Internal Commands
+
+When creating tiles, there are several "internal" commands that can be used
+to trigger actions within Farnsworth itself rather than launching an external
+program. Generally, any function within `HomeController` in `home.js` can be
+called with the custom url `about:farnsworth/${function}`. The following are
+some useful commands:
+
+- `about:farnsworth/addTile`: Invoke the add a new tile page.
+- `about:farnsworth/exit`: Exit the app.
+- `about:farnsworth/appSettings`: Open application settings.
+- `about:farnsworth/minimize`: Minimize the app.
+
 ## Remote & Controller
 
 Due to limitations in the [mousetrap](https://github.com/ccampbell/mousetrap)
