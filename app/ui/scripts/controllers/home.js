@@ -264,88 +264,130 @@ angular.module('farnsworth')
                 }
             });
 
-            // angular-hotkeys doesn't support multiple actions on one hotkey
-            // so we need to do something a little interesting: rebind the hotkey
-            // as it's pressed.
-            var addEnterHotkey = function(action) {
-                hotkeys.del('enter');
+            self.bindEnterHotkey('keydown');
+        };
 
-                var handler;
+        /**
+         * angular-hotkeys doesn't support multiple actions on one hotkey
+         * so we need to do something a little interesting: rebind the hotkey
+         * as it's pressed.
+         */       
+        self.bindEnterHotkey = function (action) {
+            hotkeys.del('enter');
 
-                // This is sort of opposite, we're adding an action
-                // when the opposite action was taken. If we're adding
-                // the 'keydown' action, it's because we just released the key.
-                if(action === 'keydown') {
-                    handler = function() {
-                        // First, setup the opposite hotkey.
-                        addEnterHotkey('keyup');
+            var handler;
 
-                        // The only time we ever want to do anything on keydown
-                        // is if the edit dialog isn't open and we're not moving
-                        // anything.
-                        if(!self.moving) {
-                            // Set our hold timer, after which, we'll activate
-                            // edit mode.
-                            self.actionTimeout = $timeout(function() {
-                                self.actionTimeout = null;
+            // This is sort of opposite, we're adding an action
+            // when the opposite action was taken. If we're adding
+            // the 'keydown' action, it's because we just released the key.
+            if (action === 'keydown') {
+                handler = function () {
+                    self.holdTile(self.selectedTile);
+                };
+            } else {
+                handler = function () {
+                    self.releaseTile(self.selctedTile);
+                };
+            }
 
-                                // Transient tiles can't be edited, always
-                                // activate them.
-                                if(!self.selectedTile.transient) {
-                                    self.startEditing(self.selectedTile);
-                                } else {
-                                    self.activate(self.selectedTile);
-                                }
-                            }, constants.holdTime);
+            hotkeys.bindTo($scope).add({
+                combo: 'enter',
+                action: action,
+                description: 'Activate the selected tile. Hold to edit instead',
+                callback: handler
+            });
+        };
 
-                            // Setup our hold promise.
-                            self.actionHold.defered = $q.defer();
-                            self.actionHold.promise = self.actionHold.defered.promise;
-                        }
-                    };
-                } else {
-                    handler = function() {
-                        // Need to make sure we resolve this promise no matter
-                        // what state we're in.
-                        self.actionHold.defered.resolve();
-                        self.actionHold.promise = null;
+        /**
+         * Start holding the specified tile, or the currently selected tile
+         * if not specified.
+         *
+         * Opens the edit popup if the tile is held long enough.
+         *
+         * @param tile The tile to hold, or nothing.
+         * @param noActionHold Defaults to false, true if we don't want to wait for
+         *          the button to be released before allowing more keypresses
+         *          (if called by a DOM attribute for example)
+         */
+        self.holdTile = function (tile, noActionHold) {
+            // Make sure we set the selected tile when we start holding.
+            if (typeof tile !== 'undefined' && tile !== self.selectedTile) {
+                self.selectTile(tile);
+            }
 
-                        addEnterHotkey('keydown');
+            if (typeof noActionHold === 'undefined') {
+                noActionHold = false;
+            }
 
-                        if(self.moving) {
-                            // If we're moving something, then enter drops
-                            // the tile we're moving.
-                            self.moving = false;
-                            self.selectedTile.category = self.selectedCategory.name;
-                            SettingsService.save().then(function() {
-                                self.init();
-                            }).catch(function(error) {
-                                $mdToast.show(
-                                  $mdToast.simple()
-                                    .textContent(`Error saving tile: ${error}`)
-                                        .hideDelay(3000));
-                            });
-                        } else {
-                            // If there was ever a timeout, then cancel it
-                            // and activate the tile.
-                            if(self.actionTimeout) {
-                                $timeout.cancel(self.actionTimeout);
-                                self.actionTimeout = null;
-                                self.activate(self.selectedTile);
-                            }
-                        }
-                    };
+             // First, setup the opposite hotkey.
+            self.bindEnterHotkey('keyup');
+
+            // The only time we ever want to do anything on keydown
+            // is if the edit dialog isn't open and we're not moving
+            // anything.
+            if(!self.moving) {
+                // Set our hold timer, after which, we'll activate
+                // edit mode.
+                self.actionTimeout = $timeout(function() {
+                    self.actionTimeout = null;
+
+                    // Transient tiles can't be edited, always
+                    // activate them.
+                    if(!self.selectedTile.transient) {
+                        self.startEditing(self.selectedTile);
+                    } else {
+                        self.activate(self.selectedTile);
+                    }
+                }, constants.holdTime);
+
+                // Setup our hold promise.
+                self.actionHold.defered = $q.defer();
+                self.actionHold.promise = self.actionHold.defered.promise;
+
+                if (noActionHold) {
+                    self.actionHold.defered.resolve();
                 }
+            }
+        };
 
-                hotkeys.bindTo($scope).add({
-                    combo: 'enter',
-                    action: action,
-                    description: 'Activate the selected tile. Hold to edit instead',
-                    callback: handler
+        /**
+         * Release the specified tile or self.selectedTile if none
+         * is specified.
+         */
+        self.releaseTile = function (tile) {
+            if (typeof tile !== 'undefined' && tile !== self.selectedTile) {
+                self.selectTile(tile);
+            }
+
+            // Need to make sure we resolve this promise no matter
+            // what state we're in.
+            self.actionHold.defered.resolve();
+            self.actionHold.promise = null;
+
+            self.bindEnterHotkey('keydown');
+
+            if (self.moving) {
+                // If we're moving something, then enter drops
+                // the tile we're moving.
+                self.moving = false;
+                self.selectedTile.category = self.selectedCategory.name;
+                SettingsService.save().then(function () {
+                    self.init();
+                }).catch(function (error) {
+                    $mdToast.show(
+                        $mdToast.simple()
+                            .textContent(`Error saving tile: ${error}`)
+                            .hideDelay(3000));
                 });
-            };
-
-            addEnterHotkey('keydown');
+            } else {
+                // If there was ever a timeout, then cancel it
+                // and activate the tile.
+                if (self.actionTimeout) {
+                    $timeout.cancel(self.actionTimeout);
+                    self.actionTimeout = null;
+                    self.activate(self.selectedTile);
+                }
+            }
         };
 
         /**

@@ -3,7 +3,7 @@
         {{ controller.text }}
     </div>
     <div ng-if='controller.dialogActions' layout="row" layout-align="center space-between">
-        <md-button ng-bind-attr-aria-label='action.caption + " Button"'
+        <md-button ng-bind-attr-aria-label='action.caption + " Button"' ng-click='controller.runAction($index)'
             ng-repeat='action in controller.dialogActions track by $index' ng-class='{"button-active": controller.action === $index}'>
             {{ action.caption }}
             <md-icon ng-if='action.icon'>{{ action.icon }}</md-icon>
