@@ -8,46 +8,46 @@
  * - prompt(string): Set the dialog's prompt text. This defaults to blank
  *      and will simply only display buttons if it's empty.
  * - template(url): Set the dialog's template URL. This defaults to the
- * 		`hotkey-dialog.html`. Note that overriding it and making practical
- * 		use of this service is a little beyond the scope of this comment,
- * 		see the template file.
+ *         `hotkey-dialog.html`. Note that overriding it and making practical
+ *         use of this service is a little beyond the scope of this comment,
+ *         see the template file.
  * - actions(object): The set of actions that a user can take. If omitted,
- * 		a simple Yes/No dialog is displayed. If it's set to an empty list,
- * 		no buttons will be displayed. Each list element should conform to:
+ *         a simple Yes/No dialog is displayed. If it's set to an empty list,
+ *         no buttons will be displayed. Each list element should conform to:
  *
- * 		```
- * 			{
- * 				'caption': 'Button Caption',
- * 				'icon': 'material_design_icon'
- * 			}
- * 		```
+ *         ```
+ *             {
+ *                 'caption': 'Button Caption',
+ *                 'icon': 'material_design_icon'
+ *             }
+ *         ```
  *
- * 		Either icon or caption may be omitted to not display the relevant
- * 		element.
+ *         Either icon or caption may be omitted to not display the relevant
+ *         element.
  * - wait(promise | undefined): If a promise is supplied, wait on the
- * 		promise before accepting the "enter" key. This prevents dialogs triggered
- * 		by holding down enter from immediately triggering their default action.
- * 		The promise can either be resolved or rejected, either way, the first enter
- * 		keypress after the promise is resolved or rejected will trigger the action.
+ *         promise before accepting the "enter" key. This prevents dialogs triggered
+ *         by holding down enter from immediately triggering their default action.
+ *         The promise can either be resolved or rejected, either way, the first enter
+ *         keypress after the promise is resolved or rejected will trigger the action.
  * - aria(string): Aria label to use, defaults to "Dialog".
  * - show(): Show the dialog, returning the standard $mdDialog promise.
  *
  * Example:
  *
  * ```
- * 		angular.module('myApp')
- * 			.controller('myController', function(HotkeyDialog) {
- *    			HotkeyDialog()
- *    				.prompt('Are you sure you want to do this?')
- *    				.show()
- *    				.then(function(result) {
- *    					if(result.caption === 'Yes') {
- *    						alert('You were sure.');
- *    					} else {
- *    						alert('You were not sure.');
- *    					}
- *    				});
- * 			});
+ *         angular.module('myApp')
+ *             .controller('myController', function(HotkeyDialog) {
+ *                HotkeyDialog()
+ *                    .prompt('Are you sure you want to do this?')
+ *                    .show()
+ *                    .then(function(result) {
+ *                        if(result.caption === 'Yes') {
+ *                            alert('You were sure.');
+ *                        } else {
+ *                            alert('You were not sure.');
+ *                        }
+ *                    });
+ *             });
  * ```
  *
  * Note that the reason we don't reject the promise on a "no" is that you may
@@ -90,6 +90,14 @@ angular.module('farnsworth')
 
                     self.action = 0;
 
+                    /**
+                     * Call on mouse click to set the action explicitly.
+                     */
+                    self.runAction = function (action) {
+                        self.action = action;
+                        $mdDialog.hide(self.dialogActions[action]);
+                    };
+                    
                     self.waitForReady().finally(function() {
                         hotkeys.bindTo($scope).add({
                             combo: 'enter',
@@ -229,6 +237,6 @@ angular.module('farnsworth')
         };
         
         return function() {
-            return HotkeyDialog();
+            return new HotkeyDialog();
         };
     });

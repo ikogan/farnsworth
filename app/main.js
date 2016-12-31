@@ -30,31 +30,24 @@ function init() {
 
 // Create the main window, mostly unchanged from the template
 function createWindow () {
+    var fullscreen = process.argv.indexOf('--windowed') === -1;
+
     // Setup browser window options
     var options = {
-        movable: false,
         fullscreenable: true,
         title: 'Farnsworth Launcher',
-        frame: false,
         backgroundColor: '#000',
         titleBarStyle: 'hidden'
     };
 
     // Turn off fullscreen if requested, useful for debugging
-    if(process.argv.indexOf('--windowed') !== -1) {
-        options.fullscreen = false;
-        options.frame = true;
-        options.movable = true;
+    if(fullscreen) {
+        options.frame = false;
+        options.movable = false;
     }
 
     // Create the browser window.
     mainWindow = new BrowserWindow(options);
-
-    // TODO: Can't recall why we call this if we set it in the options
-    // remove?
-    if(options.fullscreen) {
-        mainWindow.setFullScreen(true);
-    }
 
     // Automatically start dev tools if we're trying to develop
     if(process.argv.indexOf('--develop') !== -1) {
@@ -65,9 +58,11 @@ function createWindow () {
     mainWindow.loadURL('file://' + __dirname + '/ui/index.html');
 
     // Set fullscreen only after the DOM is ready
-    mainWindow.webContents.on('dom-ready', function() {
-        mainWindow.setFullScreen(true);
-    });
+    if(fullscreen) {
+        mainWindow.webContents.on('dom-ready', function() {
+            mainWindow.setFullScreen(true);
+        });
+    }
 
     // Emitted when the window is closed.
     mainWindow.on('closed', function() {
