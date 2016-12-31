@@ -33,7 +33,7 @@ function createWindow () {
     // Setup browser window options
     var options = {
         movable: false,
-        fullscreen: true,
+        fullscreenable: true,
         title: 'Farnsworth Launcher',
         frame: false,
         backgroundColor: '#000',
@@ -63,6 +63,11 @@ function createWindow () {
 
     // and load the index.html of the app.
     mainWindow.loadURL('file://' + __dirname + '/ui/index.html');
+
+    // Set fullscreen only after the DOM is ready
+    mainWindow.webContents.on('dom-ready', function() {
+        mainWindow.setFullScreen(true);
+    });
 
     // Emitted when the window is closed.
     mainWindow.on('closed', function() {
