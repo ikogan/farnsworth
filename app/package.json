@@ -1,7 +1,7 @@
 {
   "name": "farnsworth-launcher",
   "productName": "Farnsworth Launcher",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Fullscreen Application Launcher for TVs",
   "main": "main.js",
   "scripts": {
@@ -25,7 +25,7 @@
   "homepage": "https://bitbucket.org/ikogan/farnsworth#readme",
   "devDependencies": {
     "angular-mocks": "^1.5.5",
-    "electron-prebuilt": "1.2.1"
+    "electron-prebuilt": "1.4.13"
   },
   "dependencies": {
     "angular": "^1.5.5",

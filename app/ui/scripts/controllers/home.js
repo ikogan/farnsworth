@@ -405,7 +405,7 @@ angular.module('farnsworth')
             self.selectedCategory = self.categoryList[self.selectedCategoryIndex];
 
             self.selectedTileIndex = _.findIndex(self.selectedCategory.tiles, function(item) {
-                return item.name === tile.name;
+                return item === tile;
             });
         };
 
